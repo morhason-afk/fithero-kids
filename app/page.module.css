@@ -1,0 +1,99 @@
+.main {
+  min-height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 16px;
+    gap: 24px;
+  }
+}
+
+.pageHeader {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.logoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  background: var(--gradient-hero);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 20px 40px rgba(108, 92, 231, 0.4);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.logoSvg {
+  width: 80px;
+  height: 80px;
+}
+
+.starBadge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 40px;
+  height: 40px;
+  background: #F1C40F;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: star-spin 2s ease-in-out infinite;
+  font-size: 20px;
+}
+
+.appTitle {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(to right, #6C5CE7, #EC4899, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .appTitle {
+    font-size: 2rem;
+  }
+}
+
+.tagline {
+  color: #6B7280;
+  font-weight: 600;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.heroBox {
+  flex-shrink: 0;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.contentSection {
+  width: 100%;
+}

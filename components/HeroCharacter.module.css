@@ -1,0 +1,177 @@
+.heroCard {
+  background: transparent;
+  border-radius: 24px;
+  padding: 0;
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.heroCardBg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+}
+
+.heroCardBg::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+}
+
+.heroCardBg::after {
+  content: '';
+  position: absolute;
+  top: 80px;
+  right: 80px;
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+}
+
+.heroCardContent {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
+
+.heroLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.7);
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.characterWrapper {
+  width: auto;
+  max-width: 100%;
+  margin: 0 auto 24px;
+  animation: float 3s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.heroImageContainer {
+  width: auto;
+  height: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  background: linear-gradient(to bottom right, #e0e7ff 0%, #f3e8ff 50%, #cffafe 100%);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.croppedHeroImage {
+  width: 100%;
+  max-width: 100%;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  image-rendering: -webkit-optimize-contrast;
+  /* background-size, background-position, and aspect-ratio are set inline */
+}
+
+.heroSvg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  overflow: visible;
+}
+
+.heroImage {
+  width: auto;
+  height: auto;
+  max-width: 600px;
+  max-height: 800px;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+  image-rendering: -webkit-optimize-contrast;
+  display: block;
+}
+
+/* White background to hide transparency checkerboard */
+
+.heroName {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 16px 0 4px 0;
+}
+
+.heroSubtitle {
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.statsContainer {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.statBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statLabel {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
+  min-width: 100px;
+}
+
+.statBarBg {
+  flex: 1;
+  height: 20px;
+  background: #e5e7eb;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.statBarFill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.statValue {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #666;
+  min-width: 50px;
+  text-align: right;
+}
+
+.experienceBar {
+  margin-top: 10px;
+}
+
+.experienceLabel {
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 5px;
+}

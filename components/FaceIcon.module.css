@@ -1,0 +1,83 @@
+.faceIconContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 10;
+}
+
+.faceIcon {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.background {
+  position: absolute;
+  inset: -10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+}
+
+.backgroundEmoji {
+  font-size: 140px;
+  opacity: 0.3;
+  filter: blur(2px);
+}
+
+.faceBase {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, #FFE5B4 0%, #FFD700 100%);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+}
+
+.accessory {
+  position: absolute;
+  top: -20px;
+  z-index: 3;
+}
+
+.accessoryEmoji {
+  font-size: 40px;
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.eyes {
+  margin-top: 8px;
+  z-index: 2;
+  line-height: 1;
+}
+
+.eyesEmoji {
+  font-size: 36px;
+  display: block;
+  line-height: 1;
+}
+
+.mouth {
+  margin-top: -8px;
+  z-index: 2;
+  line-height: 1;
+}
+
+.mouthEmoji {
+  font-size: 32px;
+  display: block;
+  line-height: 1;
+}

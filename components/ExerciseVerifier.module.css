@@ -1,0 +1,129 @@
+.container {
+  text-align: center;
+  padding: 32px;
+  background: var(--gradient-hero);
+  border-radius: 24px;
+  color: white;
+}
+
+.title {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 16px;
+}
+
+.progressContainer {
+  margin: 24px 0;
+}
+
+.progressBar {
+  width: 100%;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.progressFill {
+  height: 100%;
+  background: white;
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.progressText {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+}
+
+.status {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 16px 0;
+  min-height: 24px;
+}
+
+.loadingAnimation {
+  margin: 32px 0;
+  position: relative;
+}
+
+.spinner {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.spinner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+.spinner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 4px solid white;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinnerInner {
+  position: absolute;
+  inset: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.875rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background: white;
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}

@@ -1,0 +1,143 @@
+.heroSection {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .heroSection {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.statsColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statCard {
+  border-radius: 16px;
+  padding: 16px;
+  color: white;
+}
+
+.statHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.statIcon {
+  font-size: 1.25rem;
+}
+
+.statName {
+  flex: 1;
+  margin-left: 8px;
+}
+
+.statValue {
+  font-weight: 700;
+}
+
+.statBar {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.statBarFill {
+  height: 100%;
+  background: white;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.currencyRow {
+  display: flex;
+  gap: 16px;
+}
+
+.currencyCard {
+  flex: 1;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  color: white;
+}
+
+.currencyIcon {
+  font-size: 1.875rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.currencyAmount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.currencyLabel {
+  font-size: 0.875rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.heroHeading {
+  color: #fff;
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.heroCard {
+  width: 100%;
+  min-height: 200px;
+}
+
+.heroStatic {
+  text-align: center;
+  padding: 20px;
+  color: #333;
+}
+
+.heroLevel {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #667eea;
+  margin: 0 0 16px 0;
+}
+
+.heroEmoji {
+  font-size: 5rem;
+  margin: 16px 0;
+  line-height: 1;
+}
+
+.heroText {
+  font-size: 1.1rem;
+  margin: 0 0 20px 0;
+  color: #555;
+}
+
+.heroLoadButton {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.heroLoadButton:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}

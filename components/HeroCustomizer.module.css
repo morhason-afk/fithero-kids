@@ -1,0 +1,551 @@
+.openButton {
+  background: var(--gradient-hero);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  margin: 10px;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+}
+
+.openButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.customizer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 24px;
+  padding: 0;
+  max-width: 800px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 768px) {
+  .customizer {
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 16px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.header {
+  background: var(--gradient-hero);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+.header h2 {
+  margin: 0;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.coinBalance {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.coinIcon {
+  font-size: 1rem;
+}
+
+.coinAmount {
+  font-size: 0.875rem;
+  color: white;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.preview {
+  padding: 32px;
+  background: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.preview::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.preview::after {
+  content: '';
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  width: 128px;
+  height: 128px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.options {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.categoryTabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.categoryTab {
+  padding: 8px 16px;
+  background: #EDE9FE;
+  color: var(--primary);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.categoryTab:hover {
+  background: #DDD6FE;
+}
+
+.categoryTab.active {
+  background: var(--primary);
+  color: white;
+}
+
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.optionGroup label {
+  font-weight: 700;
+  color: #1F2937;
+  font-size: 0.875rem;
+}
+
+.colorGrid,
+.buttonGrid,
+.heroGrid,
+.accessoryGrid,
+.iconGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.heroGrid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+}
+
+.accessoryGrid {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.iconGrid {
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+}
+
+.colorButton,
+.styleButton {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+}
+
+.colorButton {
+  background: var(--color-value, #F3F4F6);
+}
+
+.colorButton:hover:not(.disabled),
+.styleButton:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.colorButton.active,
+.styleButton.active {
+  box-shadow: 0 0 0 4px var(--primary);
+  transform: translateY(-2px);
+}
+
+.colorButton.disabled,
+.styleButton.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #E5E7EB !important;
+  position: relative;
+}
+
+.colorButton.disabled::after,
+.styleButton.disabled::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(156, 163, 175, 0.3);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.colorButton.disabled::after {
+  content: '🔒';
+  font-size: 1.5rem;
+}
+
+.costBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #FBBF24;
+  color: white;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ownedBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #10B981;
+  color: white;
+  font-size: 0.75rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ownedText {
+  font-size: 0.85rem;
+  font-weight: normal;
+  color: #4ade80;
+}
+
+.styleButton {
+  background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.styleButton.active {
+  background: var(--primary);
+  color: white;
+}
+
+.styleButton .itemEmoji {
+  font-size: 1.5rem;
+  margin-bottom: 4px;
+}
+
+.styleButton .itemName {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.costText,
+.ownedText {
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.costText {
+  color: #D97706;
+}
+
+.ownedText {
+  color: #10B981;
+}
+
+/* Hero Selection Cards */
+.heroCard {
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.heroCard:hover:not(.disabled) {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.heroCard.active {
+  border-color: var(--primary);
+  background: #EDE9FE;
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
+}
+
+/* Removed disabled state - all heroes are purchasable */
+
+.heroImageWrapper {
+  width: 120px;
+  height: 168px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F9FAFB;
+  border-radius: 12px;
+  overflow: visible;
+}
+
+.croppedThumbnail {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  image-rendering: -webkit-optimize-contrast;
+  /* background-size and background-position are set inline */
+}
+
+.heroThumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Remove white background from thumbnails */
+@supports (mix-blend-mode: multiply) {
+  .heroThumbnail {
+    mix-blend-mode: multiply;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+  
+  .heroImageWrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: white;
+    z-index: -1;
+    border-radius: 8px;
+  }
+}
+
+.heroCard .heroName {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #1F2937;
+  margin: 0;
+  text-align: center;
+}
+
+.heroDescription {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin: 0;
+  text-align: center;
+}
+
+/* Accessory Buttons */
+.accessoryButton {
+  background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
+  border: 2px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.accessoryButton:hover:not(.disabled) {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.accessoryButton.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.accessoryButton.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.accessoryIcon {
+  font-size: 2rem;
+}
+
+.accessoryName {
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.accessoryButton .costText,
+.accessoryButton .ownedText {
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+.iconButton {
+  aspect-ratio: 1;
+  border-radius: 16px;
+  border: 2px solid #E5E7EB;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: white;
+  min-height: 100px;
+}
+
+.iconButton:hover:not(.disabled) {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.2);
+}
+
+.iconButton.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.iconButton.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.iconEmoji {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}
+
+.iconName {
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.iconButton .costText,
+.iconButton .ownedText {
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-top: 4px;
+}
