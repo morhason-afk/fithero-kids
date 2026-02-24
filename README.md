@@ -8,9 +8,9 @@ A gamified exercise app that motivates kids to exercise through fun challenges, 
 - 🎥 **Camera Recording** - Records exercise performance using device camera
 - ⭐ **Star-Based Scoring** - Earn 1-3 stars based on performance (33%, 60%, 85%+)
 - 🔓 **Challenge Progression** - Unlock new challenges by earning 2+ stars
-- 🪙 **Coin Rewards** - Earn coins based on stars (20 coins per star)
-- 🦸 **Hero Character** - Level up your hero as you earn coins
-- 🎨 **Customization** - Customize hero appearance (some free, some cost coins)
+- 💎 **Diamond Rewards** - Earn diamonds based on stars (20 diamonds per star)
+- 🦸 **Hero Character** - Level up your hero as you earn diamonds
+- 🎨 **Customization** - Customize hero appearance (some free, some cost diamonds)
 - 💾 **Owned Items** - Once purchased, items are yours forever
 - 📅 **Weekly Goals** - Set weekly star goals with parent notifications
 - 📖 **Instructions** - Step-by-step instructions before each challenge
@@ -125,7 +125,7 @@ exercise-game-app/
 - Progress is saved automatically
 
 ### Hero System
-- Coins convert to experience → level up
+- Diamonds convert to experience → level up
 - Level affects health and strength stats
 - Hero decays if inactive for 48+ hours (retention mechanism)
 
@@ -136,7 +136,7 @@ exercise-game-app/
 
 ### Customization
 - First item in each category is free
-- Premium items cost coins (10-30 coins)
+- Premium items cost diamonds (10-30 diamonds)
 - Once purchased, items are owned forever
 
 ## Browser Requirements

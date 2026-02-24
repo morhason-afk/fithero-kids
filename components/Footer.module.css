@@ -1,0 +1,136 @@
+.footer {
+  margin-top: auto;
+  padding: 32px 24px 24px;
+  background: #F3F4F6;
+  border-radius: 0;
+}
+
+.footerGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto 24px;
+}
+
+@media (min-width: 600px) {
+  .footerGrid {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+  }
+}
+
+.brandColumn {
+  max-width: 280px;
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.brandIcon {
+  font-size: 1.25rem;
+  color: #6C5CE7;
+}
+
+.brandName {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #1F2937;
+}
+
+.brandTagline {
+  font-size: 0.875rem;
+  color: #6B7280;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.columnTitle {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin: 0 0 12px 0;
+}
+
+.columnList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.columnList li {
+  margin-bottom: 8px;
+}
+
+.columnList a {
+  font-size: 0.875rem;
+  color: #6B7280;
+  text-decoration: none;
+}
+
+.columnList a:hover {
+  color: #6C5CE7;
+}
+
+.supportLink {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.875rem;
+  color: #6B7280;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+}
+
+.supportLink:hover {
+  color: #6C5CE7;
+}
+
+.newsletterRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.newsletterInput {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  background: white;
+}
+
+.newsletterInput:focus {
+  outline: none;
+  border-color: #6C5CE7;
+}
+
+.newsletterButton {
+  padding: 10px 18px;
+  background: #6C5CE7;
+  color: white;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.newsletterButton:hover {
+  background: #5B4CDB;
+}
+
+.copyright {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin: 0;
+}

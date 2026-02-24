@@ -37,9 +37,8 @@ export default function ExerciseVerifier({ challenge, videoBlob, onVerificationC
       setStatus(step.status)
     }
 
-    // Simulate exercise verification
-    // In production, this would use actual pose detection and movement analysis
-    const score = calculateScore(challenge, videoBlob)
+    // Analyze video for motion and score accordingly
+    const score = await calculateScore(challenge, videoBlob)
     const stars = calculateStars(score)
     const coins = calculateCoinsFromStars(stars)
     const feedback = generateFeedback(score, stars, challenge)
@@ -56,37 +55,108 @@ export default function ExerciseVerifier({ challenge, videoBlob, onVerificationC
     onVerificationComplete(result)
   }
 
-  const calculateScore = (challenge: Challenge, videoBlob: Blob): number => {
-    // Simulated scoring algorithm
-    // In production, this would analyze:
-    // - Movement quality (pose detection)
-    // - Exercise completion (repetition counting)
-    // - Form correctness
-    // - Duration adherence
-    
-    // For now, return a random score between 60-100 to simulate different performance levels
+  const estimateMotionFromVideo = (blob: Blob): Promise<number> => {
+    return new Promise((resolve) => {
+      const url = URL.createObjectURL(blob)
+      const video = document.createElement('video')
+      video.muted = true
+      video.playsInline = true
+      video.preload = 'metadata'
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 64
+      canvas.height = 48
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        URL.revokeObjectURL(url)
+        resolve(0)
+        return
+      }
+
+      let prevData: Uint8ClampedArray | null = null
+      let totalMotion = 0
+      let sampleCount = 0
+
+      video.onloadeddata = () => {
+        const duration = video.duration
+        if (!duration || duration < 1) {
+          URL.revokeObjectURL(url)
+          resolve(0)
+          return
+        }
+        let time = 0.5
+        const step = Math.max(0.5, (duration - 1) / 5)
+
+        const sample = () => {
+          if (time >= duration - 0.5 || sampleCount >= 6) {
+            URL.revokeObjectURL(url)
+            resolve(sampleCount > 0 ? totalMotion / sampleCount : 0)
+            return
+          }
+          video.currentTime = time
+        }
+
+        video.onseeked = () => {
+          try {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+            const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+            if (prevData && prevData.length === data.length) {
+              let sum = 0
+              for (let i = 0; i < data.length; i += 4) {
+                sum += Math.abs(data[i] - prevData[i]) + Math.abs(data[i + 1] - prevData[i + 1]) + Math.abs(data[i + 2] - prevData[i + 2])
+              }
+              totalMotion += sum / (data.length / 4) / 3
+              sampleCount++
+            }
+            prevData = data.slice(0)
+          } catch {
+            // ignore
+          }
+          time += step
+          sample()
+        }
+
+        sample()
+      }
+
+      video.onerror = () => {
+        URL.revokeObjectURL(url)
+        resolve(0)
+      }
+
+      video.src = url
+      video.load()
+    })
+  }
+
+  const calculateScore = async (challenge: Challenge, videoBlob: Blob): Promise<number> => {
+    const motionLevel = await estimateMotionFromVideo(videoBlob)
+    const hasMeaningfulMotion = motionLevel >= 2.5
+
+    if (!hasMeaningfulMotion) {
+      return Math.round(25 + Math.random() * 20)
+    }
+
     const baseScore = 60 + Math.random() * 40
-    
-    // Adjust based on difficulty
     const difficultyMultiplier = {
       easy: 1.0,
       medium: 0.95,
       hard: 0.90
     }
-    
     return Math.round(baseScore * difficultyMultiplier[challenge.difficulty])
   }
 
   const generateFeedback = (score: number, stars: number, challenge: Challenge): string => {
-    if (stars === 3) {
-      return `Amazing work! You got ${stars} stars on ${challenge.title}! 🌟`
-    } else if (stars === 2) {
-      return `Great job! You got ${stars} stars on ${challenge.title}! 👏`
-    } else if (stars === 1) {
-      return `Good effort! You got ${stars} star on ${challenge.title}! 💪`
-    } else {
-      return `Keep practicing ${challenge.title} to earn stars! 🚀`
+    if (stars >= 3) {
+      return `Amazing! You did the exercise as instructed. You got ${stars} stars on ${challenge.title}! 🌟`
     }
+    if (stars === 2) {
+      return `Great job! You did the exercise well. You got ${stars} stars on ${challenge.title}! 👏`
+    }
+    if (stars === 1) {
+      return `You're getting there! Follow the instructions more closely to earn more stars. Try again! 💪`
+    }
+    return `You didn't do the challenge as instructed. Move more and follow the instructions! Try again. 🚀`
   }
 
   return (

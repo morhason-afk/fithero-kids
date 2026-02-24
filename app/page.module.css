@@ -1,97 +1,91 @@
 .main {
   min-height: 100vh;
-  padding: 20px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
 @media (max-width: 768px) {
   .main {
-    padding: 16px;
-    gap: 24px;
+    padding: 10px 12px;
+    gap: 12px;
   }
 }
 
 .pageHeader {
-  text-align: center;
-  padding: 24px 16px;
+  padding: 16px 0;
+  border-bottom: none;
+}
+
+.headerRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .logoContainer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   gap: 12px;
 }
 
-.logo {
-  position: relative;
-  width: 128px;
-  height: 128px;
-  background: var(--gradient-hero);
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 20px 40px rgba(108, 92, 231, 0.4);
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.logoSvg {
-  width: 80px;
-  height: 80px;
-}
-
-.starBadge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 40px;
-  height: 40px;
-  background: #F1C40F;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  animation: star-spin 2s ease-in-out infinite;
-  font-size: 20px;
+.logoIcon {
+  font-size: 1.75rem;
+  color: #6C5CE7;
+  line-height: 1;
 }
 
 .appTitle {
   font-family: 'Fredoka', sans-serif;
-  font-size: 2.5rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(to right, #6C5CE7, #EC4899, #06B6D4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #6C5CE7;
   margin: 0;
+  line-height: 1.2;
 }
 
 @media (max-width: 768px) {
   .appTitle {
-    font-size: 2rem;
+    font-size: 1.35rem;
   }
 }
 
 .tagline {
-  color: #6B7280;
-  font-weight: 600;
-  font-size: 1rem;
-  margin: 0;
+  color: #9CA3AF;
+  font-weight: 500;
+  font-size: 0.8125rem;
+  margin: 4px 0 0 0;
+}
+
+.headerRight {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.headerFace {
+  flex-shrink: 0;
+  transform: scale(0.65);
+  transform-origin: center center;
+}
+
+.headerFace > * {
+  margin-bottom: 0;
 }
 
 .heroBox {
   flex-shrink: 0;
   width: 100%;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 0;
 }
 
 .contentSection {

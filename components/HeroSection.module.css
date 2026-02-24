@@ -1,92 +1,99 @@
 .heroSection {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 24px;
-  width: 100%;
-}
-
-@media (min-width: 768px) {
-  .heroSection {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.statsColumn {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
 }
 
-.statCard {
-  border-radius: 16px;
-  padding: 16px;
-  color: white;
-}
-
-.statHeader {
+.heroBlocks {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+  justify-content: center;
+}
+
+.heroCharacterBlock {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.statIcon {
-  font-size: 1.25rem;
-}
-
-.statName {
-  flex: 1;
-  margin-left: 8px;
-}
-
-.statValue {
-  font-weight: 700;
-}
-
-.statBar {
-  height: 12px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.statBarFill {
-  height: 100%;
-  background: white;
-  border-radius: 6px;
-  transition: width 0.5s ease;
-}
-
-.currencyRow {
-  display: flex;
-  gap: 16px;
-}
-
-.currencyCard {
-  flex: 1;
+  gap: 12px;
+  background: #ffffff;
   border-radius: 16px;
   padding: 16px;
-  text-align: center;
-  color: white;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.currencyIcon {
-  font-size: 1.875rem;
-  display: block;
-  margin-bottom: 4px;
+.heroFaceBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 160px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
-.currencyAmount {
-  font-size: 1.25rem;
+.faceBlockLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.facePreview {
+  flex-shrink: 0;
+}
+
+.customizeCharacterButton {
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin: 0;
+  cursor: pointer;
+  border: none;
+  background: #6C5CE7;
+  color: white;
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.currencyLabel {
-  font-size: 0.875rem;
-  margin: 0;
-  opacity: 0.9;
+.customizeCharacterButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(108, 92, 231, 0.4);
+}
+
+.customizeFaceButton {
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 2px solid #BFDBFE;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.customizeFaceButton:hover {
+  background: #DBEAFE;
+  transform: translateY(-1px);
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .heroHeading {

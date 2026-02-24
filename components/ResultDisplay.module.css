@@ -78,6 +78,29 @@
   animation: bounce-in 0.5s ease-out forwards;
 }
 
+.resultCardCelebrate {
+  border: 3px solid #FBBF24;
+  box-shadow: 0 20px 60px rgba(251, 191, 36, 0.3);
+}
+
+.resultCardTryAgain {
+  border: 2px solid #E5E7EB;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.resultCardTryAgain .title {
+  color: #6B7280;
+}
+
+.resultCardTryAgain .playAgainButton {
+  background: #6B7280;
+  box-shadow: none;
+}
+
+.resultCardTryAgain .playAgainButton:hover {
+  background: #4B5563;
+}
+
 .celebrationIcon {
   font-size: 4rem;
   margin-bottom: 16px;

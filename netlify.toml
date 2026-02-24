@@ -1,0 +1,8 @@
+# FitHero Kids — Netlify deploy config
+# Uses @netlify/plugin-nextjs (OpenNext) for Next.js 14
+
+[build]
+  command = "npm run build"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

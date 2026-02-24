@@ -19,11 +19,15 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
   const [encouragementMessage, setEncouragementMessage] = useState<string | null>(null)
   
   const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const encouragementTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const motionLevelRef = useRef<number>(0)
+  const prevFrameRef = useRef<Uint8ClampedArray | null>(null)
+  const MOTION_THRESHOLD = 2.5
 
   useEffect(() => {
     initializeCamera()
@@ -52,36 +56,84 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
     })
   }, [cameraStatus])
 
+  // Simple motion detection: sample video frames and compare to previous
+  useEffect(() => {
+    if (!isRecording || !videoRef.current || videoRef.current.readyState < 2) return
+    const video = videoRef.current
+    let canvas = canvasRef.current
+    if (!canvas) {
+      canvas = document.createElement('canvas')
+      canvas.width = 64
+      canvas.height = 48
+      canvasRef.current = canvas
+    }
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const interval = setInterval(() => {
+      if (!video || video.readyState < 2) return
+      try {
+        ctx.drawImage(video, 0, 0, canvas!.width, canvas!.height)
+        const data = ctx.getImageData(0, 0, canvas!.width, canvas!.height).data
+        if (prevFrameRef.current && prevFrameRef.current.length === data.length) {
+          let sum = 0
+          for (let i = 0; i < data.length; i += 4) {
+            sum += Math.abs(data[i] - prevFrameRef.current[i]) + Math.abs(data[i + 1] - prevFrameRef.current[i + 1]) + Math.abs(data[i + 2] - prevFrameRef.current[i + 2])
+          }
+          const meanDiff = sum / (data.length / 4) / 3
+          motionLevelRef.current = meanDiff
+        }
+        prevFrameRef.current = data.slice(0)
+      } catch {
+        // ignore
+      }
+    }, 500)
+    return () => {
+      clearInterval(interval)
+    }
+  }, [isRecording])
+
   useEffect(() => {
     if (isRecording && timeRemaining > 0) {
       timerRef.current = setInterval(() => {
         setTimeRemaining((prev) => {
           const newTime = prev - 1
-          
-          // Show encouragement messages at specific times
-          const encouragementMessages = [
+          const hasGoodMotion = motionLevelRef.current >= MOTION_THRESHOLD
+
+          const positiveMessages = [
             { time: challenge.duration - 3, msg: 'Great start! Keep going! 💪', sound: 'encourage' as const },
-            { time: Math.floor(challenge.duration * 0.7), msg: 'You\'re doing great! 🌟', sound: 'encourage' as const },
+            { time: Math.floor(challenge.duration * 0.7), msg: "You're doing great! 🌟", sound: 'encourage' as const },
             { time: Math.floor(challenge.duration * 0.5), msg: 'Halfway there! Keep it up! 🔥', sound: 'encourage' as const },
-            { time: Math.floor(challenge.duration * 0.3), msg: 'You\'re amazing! 💪', sound: 'encourage' as const },
+            { time: Math.floor(challenge.duration * 0.3), msg: "You're amazing! 💪", sound: 'encourage' as const },
             { time: 5, msg: 'Almost there! 5 more seconds! ⏱️', sound: 'countdown' as const },
             { time: 3, msg: '3... Keep it up! 🔥', sound: 'countdown' as const },
             { time: 2, msg: '2... Almost done! 🎯', sound: 'countdown' as const },
             { time: 1, msg: '1... Last second! 🚀', sound: 'countdown' as const },
           ]
-          
-          const encouragement = encouragementMessages.find(e => e.time === newTime)
+          const lowMotionMessages = [
+            { time: challenge.duration - 3, msg: "Let's see those moves! Get moving! 💪", sound: 'encourage' as const },
+            { time: Math.floor(challenge.duration * 0.7), msg: 'Keep moving! Show us your best! 🏃', sound: 'encourage' as const },
+            { time: Math.floor(challenge.duration * 0.5), msg: 'Keep going! Move your body! 🔥', sound: 'encourage' as const },
+            { time: Math.floor(challenge.duration * 0.3), msg: 'Almost there — keep moving! 💪', sound: 'encourage' as const },
+            { time: 5, msg: '5 seconds left — give it your all! ⏱️', sound: 'countdown' as const },
+            { time: 3, msg: '3... Keep moving! 🔥', sound: 'countdown' as const },
+            { time: 2, msg: '2... Push through! 🎯', sound: 'countdown' as const },
+            { time: 1, msg: '1... Last second! 🚀', sound: 'countdown' as const },
+          ]
+
+          const messages = hasGoodMotion ? positiveMessages : lowMotionMessages
+          const encouragement = messages.find(e => e.time === newTime)
           if (encouragement) {
             showEncouragement(encouragement.msg, encouragement.sound)
           }
-          
+
           if (newTime === 0) {
-            showEncouragement('Awesome! You did it! 🎉', 'complete')
+            showEncouragement(hasGoodMotion ? 'Awesome! You did it! 🎉' : 'Done! Keep practicing to earn more stars! 🌟', 'complete')
             playSound('complete')
             stopRecording()
             return 0
           }
-          
+
           return newTime
         })
       }, 1000)
@@ -224,14 +276,6 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
     }
   }
 
-  const handleCancel = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop()
-    }
-    cleanup()
-    onCancel()
-  }
-
   if (cameraStatus === 'loading') {
     return (
       <div className={styles.container}>
@@ -250,9 +294,6 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
           <p>{error || 'Camera access denied'}</p>
           <button className={styles.button} onClick={initializeCamera}>
             Try Again
-          </button>
-          <button className={styles.button} onClick={handleCancel}>
-            Cancel
           </button>
         </div>
       </div>
@@ -305,12 +346,8 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
             ▶️ Start Recording
           </button>
         ) : (
-          <button className={styles.stopButton} onClick={stopRecording} aria-label="Stop recording">
-          </button>
+          <p className={styles.recordingHint}>Recording… Complete the challenge to finish.</p>
         )}
-        <button className={styles.cancelButton} onClick={handleCancel}>
-          Cancel
-        </button>
       </div>
 
       <div className={styles.instructions}>

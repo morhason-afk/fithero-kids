@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Challenge } from '@/types/challenge'
 import { useGame } from '@/contexts/GameContext'
 import { useHero } from '@/contexts/HeroContext'
 import { useConfig } from '@/contexts/ConfigContext'
+import { useSubscription } from '@/contexts/SubscriptionContext'
 import { isChallengeUnlocked } from '@/utils/challengeProgression'
-import { getStarEmoji } from '@/utils/scoring'
+import { challengeRequiresSubscription } from '@/utils/subscription'
 import styles from './ChallengeSelection.module.css'
 
 interface ChallengeSelectionProps {
@@ -16,32 +17,51 @@ interface ChallengeSelectionProps {
 export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelectionProps) {
   const { challengeProgress, getProgress } = useGame()
   const { hero } = useHero()
-  const { challenges } = useConfig()
+  const { challenges, config } = useConfig()
+  const { hasSubscription, showSubscriptionMessage } = useSubscription()
+  const getMinStarsToUnlock = (challenge: Challenge) =>
+    config.minStarsToUnlockByChallengeId[challenge.id] ?? challenge.unlockRequirement?.minStars ?? 2
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
   const sortedChallenges = [...challenges].sort((a, b) => a.order - b.order)
 
-  const handleChallengeClick = (challenge: Challenge) => {
-    if (isChallengeUnlocked(challenge, challengeProgress)) {
-      onSelectChallenge(challenge)
+  const handleChallengeClick = (challenge: Challenge, index: number) => {
+    const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
+    if (!unlocked) return
+    const needsSubscription = challengeRequiresSubscription(index) && !hasSubscription
+    if (needsSubscription) {
+      showSubscriptionMessage('challenges')
+      return
     }
+    onSelectChallenge(challenge)
   }
 
   return (
     <div className={styles.container}>
       <div className={styles.headerSection}>
         <h2 className={styles.title}>Choose Challenge!</h2>
-        <div className={styles.coinBalance}>
+      </div>
+      <div className={styles.challengeSubheader}>
+        <p className={styles.subscriptionHint}>
+          <span className={styles.hintIcon} aria-hidden>ℹ️</span>
+          Challenges 1-4: Free. Challenge 5+: Requires Subscription.
+        </p>
+        <div className={styles.currentBalance}>
+          <span className={styles.currentBalanceLabel}>CURRENT BALANCE</span>
           <span className={styles.coinIcon}>💎</span>
-          <span className={styles.coinAmount}>{hero.stats.totalCoins}</span>
+          <span className={styles.coinAmount} suppressHydrationWarning>{mounted ? hero.stats.totalCoins : 0}</span>
         </div>
       </div>
       
       <div className={styles.challengeGrid}>
-        {sortedChallenges.map((challenge) => {
-          const unlocked = isChallengeUnlocked(challenge, challengeProgress)
+        {sortedChallenges.map((challenge, index) => {
+          const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
+          const subscriptionLocked = challengeRequiresSubscription(index) && !hasSubscription
           const progress = getProgress(challenge.id)
           const bestStars = progress?.bestStars || 0
+          const showLock = !unlocked || subscriptionLocked
 
           const getChallengeGradient = () => {
             if (!unlocked) return ''
@@ -62,29 +82,40 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
             <div
               key={challenge.id}
               className={`${styles.challengeCard} ${
-                !unlocked ? styles.locked : ''
+                showLock ? styles.locked : ''
               } ${hoveredId === challenge.id ? styles.hovered : ''}`}
               style={unlocked ? { background: getChallengeGradient() } : {}}
               onMouseEnter={() => unlocked && setHoveredId(challenge.id)}
               onMouseLeave={() => setHoveredId(null)}
-              onClick={() => handleChallengeClick(challenge)}
+              onClick={() => handleChallengeClick(challenge, index)}
             >
-              {!unlocked && (
+              {showLock && (
                 <div className={styles.lockOverlay}>
                   <div className={styles.lockIcon}>🔒</div>
                   <div className={styles.lockText}>
-                    Get {challenge.unlockRequirement?.minStars || 2} stars on previous challenge to unlock
+                    {!unlocked
+                      ? `Get ${getMinStarsToUnlock(challenge)} star${getMinStarsToUnlock(challenge) !== 1 ? 's' : ''} on previous challenge to unlock`
+                      : subscriptionLocked
+                        ? 'Premium Challenge'
+                        : ''}
                   </div>
+                  {subscriptionLocked && (
+                    <p className={styles.lockSubtext}>Subscribe to unlock</p>
+                  )}
+                  {subscriptionLocked && (
+                    <button type="button" className={styles.unlockButton} onClick={(e) => { e.stopPropagation(); showSubscriptionMessage('challenges'); }}>
+                      UNLOCK NOW
+                    </button>
+                  )}
                 </div>
               )}
-              
               {progress && bestStars > 0 && (
                 <div className={styles.bestStars}>
                   ⭐ {bestStars}
                 </div>
               )}
               
-              {!progress && unlocked && (
+              {!progress && unlocked && !subscriptionLocked && (
                 <div className={styles.newBadge}>NEW</div>
               )}
 

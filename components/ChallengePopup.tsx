@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Challenge, ExerciseResult } from '@/types/challenge'
 import ChallengeInstructions from './ChallengeInstructions'
 import CameraRecorder from './CameraRecorder'
@@ -8,7 +8,7 @@ import ExerciseVerifier from './ExerciseVerifier'
 import ResultDisplay from './ResultDisplay'
 import BoxingChallenge from './BoxingChallenge'
 import FruitNinjaChallenge from './FruitNinjaChallenge'
-import { calculateStars, calculateCoinsFromStars } from '@/utils/scoring'
+import { calculateStarsFromCompliance, calculateCoinsFromStars } from '@/utils/scoring'
 import { trackEvent } from '@/utils/analytics'
 import styles from './ChallengePopup.module.css'
 
@@ -43,52 +43,76 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
     trackEvent('challenge_completed', { challengeId: challenge.id })
   }
 
-  const handleBoxingComplete = (score: number, punches: number) => {
-    // Very lenient scoring - ensure everyone gets stars
-    // Base score from punches - even 1 punch gives good score
-    const punchScore = Math.min(100, Math.max(50, (punches / Math.max(1, challenge.duration * 0.5)) * 100))
-    // Combine with hit score (more weight on punches)
-    const combinedScore = Math.min(100, Math.round(punchScore * 0.7 + Math.min(score / 5, 30)))
-    
-    // Ensure minimum score of 50 for participation (guarantees at least 1 star)
-    const normalizedScore = Math.max(50, combinedScore)
-    
-    const stars = calculateStars(normalizedScore)
-    const coins = calculateCoinsFromStars(stars)
-    
-    let feedback = `Great boxing! You threw ${punches} punch${punches !== 1 ? 'es' : ''}`
-    if (score > 0) {
-      feedback += ` and scored ${score} points`
+  const handleBoxingComplete = (score: number, punches: number, totalTargets: number) => {
+    const opportunities = Math.max(1, totalTargets)
+    const compliance = punches / opportunities
+
+    if (compliance < 0.5) {
+      const exerciseResult: ExerciseResult = {
+        score: Math.round(compliance * 100),
+        stars: 0,
+        coins: 0,
+        feedback: "You didn't do the challenge as instructed. Throw punches at the targets when they appear! Try again. 🥊"
+      }
+      setResult(exerciseResult)
+      setState('result')
+      trackEvent('challenge_completed', { challengeId: challenge.id })
+      return
     }
-    feedback += `! 🥊`
-    
-    const exerciseResult: ExerciseResult = {
-      score: normalizedScore,
+
+    const stars = calculateStarsFromCompliance(compliance)
+    const coins = calculateCoinsFromStars(stars)
+    const pct = Math.round(compliance * 100)
+    const feedback = stars >= 3
+      ? `Amazing! You hit ${punches} of ${totalTargets} targets (${pct}%)! Perfect boxing! 🌟`
+      : stars === 2
+        ? `Great job! You hit ${punches} of ${totalTargets} targets (${pct}%). Keep it up! 👏`
+        : `You hit ${punches} of ${totalTargets} targets. Follow the instructions more closely to earn more stars. Try again! 💪`
+
+    setResult({
+      score: Math.round(compliance * 100),
       stars,
       coins,
       feedback
-    }
-    
-    setResult(exerciseResult)
+    })
     setState('result')
     trackEvent('challenge_completed', { challengeId: challenge.id })
   }
 
-  const handleFruitNinjaComplete = (score: number, hits: number) => {
-    // Calculate score based on hits and score
-    const normalizedScore = Math.min(100, Math.round((hits / challenge.duration) * 60 + (score / 100) * 40))
-    const stars = calculateStars(normalizedScore)
+  const handleFruitNinjaComplete = (score: number, hits: number, totalFruits: number) => {
+    const opportunities = Math.max(1, totalFruits)
+    const compliance = Math.min(1, hits / opportunities)
+
+    let stars: number
+    let feedback: string
+    const pct = Math.round(compliance * 100)
+
+    if (hits === 0) {
+      stars = 0
+      feedback = "You didn't slice any fruits. Tap or click on the fruits, or wave your hands at them! Try again. 🍎"
+    } else if (compliance >= 0.9) {
+      stars = 3
+      feedback = `Amazing! You sliced ${hits} of ${totalFruits} fruits (${pct}%)! Perfect ninja! 🌟`
+    } else if (compliance >= 0.7) {
+      stars = 2
+      feedback = `Great job! You sliced ${hits} of ${totalFruits} fruits (${pct}%). Keep it up! 👏`
+    } else if (compliance >= 0.5 || hits >= 1) {
+      stars = 1
+      feedback = compliance >= 0.5
+        ? `You sliced ${hits} of ${totalFruits} fruits (${pct}%). Slice more to earn more stars! 💪`
+        : `You sliced ${hits} of ${totalFruits} fruits. Nice start! Slice more next time for more stars. 🍎`
+    } else {
+      stars = 0
+      feedback = "You didn't do the challenge as instructed. Slice the fruits by tapping or waving your hands! Try again. 🍎"
+    }
+
     const coins = calculateCoinsFromStars(stars)
-    const feedback = `Awesome ninja skills! You hit ${hits} fruits and scored ${score} points! 🍎`
-    
-    const exerciseResult: ExerciseResult = {
-      score: normalizedScore,
+    setResult({
+      score: Math.round(compliance * 100),
       stars,
       coins,
       feedback
-    }
-    
-    setResult(exerciseResult)
+    })
     setState('result')
     trackEvent('challenge_completed', { challengeId: challenge.id })
   }
@@ -99,9 +123,15 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
 
   const isInteractiveChallenge = challenge.exerciseType === 'boxing' || challenge.exerciseType === 'fruit-ninja'
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   return (
-    <div className={styles.overlay}>
-      <div className={styles.popup}>
+    <div className={styles.overlay} onClick={handleClose}>
+      <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
         {state === 'challenge' && (
           <div className={styles.challengeView}>
             <div className={styles.challengeHeader}>
@@ -119,16 +149,24 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>🎯 Goal</span>
-                <span className={styles.infoValue}>Complete challenge</span>
+                <span className={styles.infoValue}>
+                  {challenge.exerciseType === 'boxing'
+                    ? 'Hit at least 50% of targets with punches'
+                    : challenge.exerciseType === 'fruit-ninja'
+                      ? 'Slice at least 50% of fruits with your hands'
+                      : 'Complete challenge'}
+                </span>
               </div>
               <div className={styles.infoItem} style={{ background: '#FEF3C7' }}>
                 <span className={styles.infoLabel} style={{ color: '#D97706' }}>💎 Reward</span>
-                <span className={styles.infoValue} style={{ color: '#D97706' }}>20-60 coins</span>
+                <span className={styles.infoValue} style={{ color: '#D97706' }}>20-60 diamonds</span>
               </div>
             </div>
-            <button className={styles.startButton} onClick={handleShowInstructions}>
-              🎮 Start Challenge!
-            </button>
+            <div className={styles.startButtonWrap}>
+              <button className={styles.startButton} onClick={handleShowInstructions}>
+                🎮 Start Challenge!
+              </button>
+            </div>
           </div>
         )}
 

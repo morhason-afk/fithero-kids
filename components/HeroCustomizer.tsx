@@ -1,81 +1,120 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useHero } from '@/contexts/HeroContext'
+import { useSubscription } from '@/contexts/SubscriptionContext'
 import { trackEvent } from '@/utils/analytics'
-import { HERO_OPTIONS, ACCESSORIES, HeroOption } from '@/data/heroes'
+import {
+  SKIN_OPTIONS,
+  OUTFIT_OPTIONS,
+  CHARACTER_ACCESSORIES,
+  type SkinOption,
+  type OutfitOption,
+  type CharacterAccessoryOption,
+} from '@/data/characterOptions'
 import { EYES_OPTIONS, MOUTH_OPTIONS, ACCESSORY_OPTIONS, BACKGROUND_OPTIONS, IconElement } from '@/data/iconCustomization'
+import { heroRequiresSubscription, faceOptionRequiresSubscription } from '@/utils/subscription'
 import HeroCharacter from './HeroCharacter'
-import Image from 'next/image'
 import styles from './HeroCustomizer.module.css'
 
-export default function HeroCustomizer() {
-  const { hero, updateCosmetics, spendCoins, addOwnedItem, isItemOwned } = useHero()
-  const [isOpen, setIsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<'heroes' | 'icon'>('heroes')
+export type CustomizerSection = 'character' | 'face'
 
-  const handleHeroSelect = (heroOption: HeroOption) => {
-    // If already owned, just select it (no charge)
-    if (isItemOwned(heroOption.id)) {
-      updateCosmetics({ selectedHeroId: heroOption.id })
+interface HeroCustomizerProps {
+  isOpen: boolean
+  onClose: () => void
+  initialSection?: CustomizerSection
+}
+
+export default function HeroCustomizer({ isOpen, onClose, initialSection = 'character' }: HeroCustomizerProps) {
+  const { hero, updateCosmetics, spendCoins, addOwnedItem, isItemOwned } = useHero()
+  const { hasSubscription, showSubscriptionMessage } = useSubscription()
+  const [activeTab, setActiveTab] = useState<CustomizerSection>(initialSection)
+
+  useEffect(() => {
+    if (isOpen) setActiveTab(initialSection)
+  }, [isOpen, initialSection])
+
+  const build = hero.cosmetics.characterBuild || { skinId: 'skin-default', outfitId: 'outfit-red', accessoryIds: ['acc-none'] }
+
+  const handleSkinSelect = (skin: SkinOption, index: number) => {
+    if (heroRequiresSubscription(index) && !hasSubscription) {
+      showSubscriptionMessage('heroes')
       return
     }
-
-    if (heroOption.cost === 0) {
-      // Free hero - mark as owned and select
-      addOwnedItem(heroOption.id)
-      updateCosmetics({ selectedHeroId: heroOption.id })
+    if (isItemOwned(skin.id)) {
+      updateCosmetics({ characterBuild: { ...build, skinId: skin.id } })
+      return
+    }
+    if (skin.cost === 0) {
+      addOwnedItem(skin.id)
+      updateCosmetics({ characterBuild: { ...build, skinId: skin.id } })
+    } else if (spendCoins(skin.cost)) {
+      addOwnedItem(skin.id)
+      updateCosmetics({ characterBuild: { ...build, skinId: skin.id } })
+      trackEvent('purchase', { itemId: skin.id, itemCost: skin.cost })
     } else {
-      // Paid hero - check if can afford and spend
-      if (spendCoins(heroOption.cost)) {
-        addOwnedItem(heroOption.id) // Mark as owned
-        updateCosmetics({ selectedHeroId: heroOption.id })
-        trackEvent('purchase', { itemId: heroOption.id, itemCost: heroOption.cost })
-      } else {
-        alert(`Not enough coins! You need ${heroOption.cost} coins. You have ${hero.stats.totalCoins} coins.`)
-      }
+      alert(`Not enough diamonds! You need ${skin.cost} diamonds. You have ${hero.stats.totalCoins} diamonds.`)
     }
   }
 
-  const handleAccessoryToggle = (accessory: HeroOption) => {
-    const hasAccessory = hero.cosmetics.accessories.includes(accessory.id)
-    const newAccessories = hasAccessory
-      ? hero.cosmetics.accessories.filter(a => a !== accessory.id)
-      : [...hero.cosmetics.accessories, accessory.id]
-    
-    // If not owned, try to purchase
-    if (!isItemOwned(accessory.id)) {
-      if (accessory.cost === 0) {
-        addOwnedItem(accessory.id)
-        updateCosmetics({ accessories: newAccessories })
-      } else if (spendCoins(accessory.cost)) {
-        addOwnedItem(accessory.id)
-        updateCosmetics({ accessories: newAccessories })
-        trackEvent('purchase', { itemId: accessory.id, itemCost: accessory.cost })
+  const handleOutfitSelect = (outfit: OutfitOption, index: number) => {
+    if (heroRequiresSubscription(index) && !hasSubscription) {
+      showSubscriptionMessage('heroes')
+      return
+    }
+    if (isItemOwned(outfit.id)) {
+      updateCosmetics({ characterBuild: { ...build, outfitId: outfit.id } })
+      return
+    }
+    if (outfit.cost === 0) {
+      addOwnedItem(outfit.id)
+      updateCosmetics({ characterBuild: { ...build, outfitId: outfit.id } })
+    } else if (spendCoins(outfit.cost)) {
+      addOwnedItem(outfit.id)
+      updateCosmetics({ characterBuild: { ...build, outfitId: outfit.id } })
+      trackEvent('purchase', { itemId: outfit.id, itemCost: outfit.cost })
+    } else {
+      alert(`Not enough diamonds! You need ${outfit.cost} diamonds. You have ${hero.stats.totalCoins} diamonds.`)
+    }
+  }
+
+  const handleCharacterAccessoryToggle = (acc: CharacterAccessoryOption, index: number) => {
+    if (heroRequiresSubscription(index) && !hasSubscription) {
+      showSubscriptionMessage('heroes')
+      return
+    }
+    const current = build.accessoryIds || []
+    const hasIt = current.includes(acc.id)
+    const newIds = hasIt ? current.filter(id => id !== acc.id) : [...current.filter(id => id !== 'acc-none'), acc.id]
+    if (!isItemOwned(acc.id)) {
+      if (acc.cost === 0) {
+        addOwnedItem(acc.id)
+        updateCosmetics({ characterBuild: { ...build, accessoryIds: newIds } })
+      } else if (spendCoins(acc.cost)) {
+        addOwnedItem(acc.id)
+        updateCosmetics({ characterBuild: { ...build, accessoryIds: newIds } })
+        trackEvent('purchase', { itemId: acc.id, itemCost: acc.cost })
       } else {
-        alert(`Not enough coins! You need ${accessory.cost} coins. You have ${hero.stats.totalCoins} coins.`)
+        alert(`Not enough diamonds! You need ${acc.cost} diamonds. You have ${hero.stats.totalCoins} diamonds.`)
         return
       }
     } else {
-      updateCosmetics({ accessories: newAccessories })
+      updateCosmetics({ characterBuild: { ...build, accessoryIds: newIds } })
     }
   }
 
   const canAfford = (cost: number, itemId: string) => {
-    // If owned, can always "afford" (it's free)
     if (isItemOwned(itemId)) return true
     return hero.stats.totalCoins >= cost
   }
 
-  const isHeroSelected = (heroId: string) => {
-    return hero.cosmetics.selectedHeroId === heroId
-  }
+  const isCharacterAccessoryActive = (id: string) => (build.accessoryIds || []).includes(id)
 
-  const isAccessoryActive = (accessoryId: string) => {
-    return hero.cosmetics.accessories.includes(accessoryId)
-  }
-
-  const handleIconElementSelect = (element: IconElement) => {
+  const handleIconElementSelect = (element: IconElement, optionIndexInCategory: number) => {
+    if (faceOptionRequiresSubscription(optionIndexInCategory) && !hasSubscription) {
+      showSubscriptionMessage('face')
+      return
+    }
     // If already owned, just select it (no charge)
     if (isItemOwned(element.id)) {
       updateCosmetics({
@@ -108,7 +147,7 @@ export default function HeroCustomizer() {
         })
         trackEvent('purchase', { itemId: element.id, itemCost: element.cost })
       } else {
-        alert(`Not enough coins! You need ${element.cost} coins. You have ${hero.stats.totalCoins} coins.`)
+        alert(`Not enough diamonds! You need ${element.cost} diamonds. You have ${hero.stats.totalCoins} diamonds.`)
       }
     }
   }
@@ -117,17 +156,18 @@ export default function HeroCustomizer() {
     return hero.cosmetics.iconCustomization[category as keyof typeof hero.cosmetics.iconCustomization] === elementId
   }
 
-  if (!isOpen) {
-    return (
-      <button className={styles.openButton} onClick={() => setIsOpen(true)}>
-        🎨 Customize Hero
-      </button>
-    )
-  }
+  useEffect(() => {
+    if (!isOpen) return
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
 
   return (
     <>
-      <div className={styles.overlay} onClick={() => setIsOpen(false)}></div>
+      <div className={styles.overlay} onClick={onClose} aria-label="Close"></div>
       <div className={styles.customizer} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>🎨 Customize Your Hero</h2>
@@ -135,7 +175,7 @@ export default function HeroCustomizer() {
             <span className={styles.coinIcon}>💎</span>
             <span className={styles.coinAmount}>{hero.stats.totalCoins}</span>
           </div>
-          <button className={styles.closeButton} onClick={() => setIsOpen(false)}>
+          <button className={styles.closeButton} onClick={onClose}>
             ✕
           </button>
         </div>
@@ -144,130 +184,128 @@ export default function HeroCustomizer() {
           <HeroCharacter />
         </div>
 
-        {/* Tabs */}
         <div className={styles.categoryTabs}>
           <button
-            className={`${styles.categoryTab} ${activeTab === 'heroes' ? styles.active : ''}`}
-            onClick={() => setActiveTab('heroes')}
+            className={`${styles.categoryTab} ${activeTab === 'character' ? styles.active : ''}`}
+            onClick={() => setActiveTab('character')}
           >
-            🦸 Heroes
+            🦸 Character
           </button>
           <button
-            className={`${styles.categoryTab} ${activeTab === 'icon' ? styles.active : ''}`}
-            onClick={() => setActiveTab('icon')}
+            className={`${styles.categoryTab} ${activeTab === 'face' ? styles.active : ''}`}
+            onClick={() => setActiveTab('face')}
           >
-            😊 Face Icon
+            😊 Face
           </button>
         </div>
 
-        <div className={styles.options}>
-          {activeTab === 'heroes' && (
-            <>
-              {/* Hero Selection */}
-              <div className={styles.optionGroup}>
-                <label>Select Hero</label>
-            <div className={styles.heroGrid}>
-              {HERO_OPTIONS.map((heroOption) => (
-                <button
-                  key={heroOption.id}
-                  className={`${styles.heroCard} ${
-                    isHeroSelected(heroOption.id) ? styles.active : ''
-                  }`}
-                  onClick={() => handleHeroSelect(heroOption)}
-                  title={isItemOwned(heroOption.id) ? 'Owned' : heroOption.cost === 0 ? 'Free' : `${heroOption.cost} coins`}
-                >
-                  <div className={styles.heroImageWrapper}>
-                    {heroOption.cropWidth !== undefined ? (
-                      <div 
-                        className={styles.croppedThumbnail}
-                        style={{
-                          backgroundImage: `url(${heroOption.image})`,
-                          backgroundSize: `${100 / (heroOption.cropWidth! / 100)}% ${100 / ((heroOption.cropHeight || 100) / 100)}%`,
-                          backgroundPosition: `${heroOption.cropX || 0}% ${heroOption.cropY || 0}%`,
-                          backgroundRepeat: 'no-repeat',
-                          aspectRatio: `${heroOption.cropWidth} / ${heroOption.cropHeight || 100}`
-                        }}
-                      />
-                    ) : (
-                      <Image
-                        src={heroOption.image}
-                        alt={heroOption.name}
-                        width={120}
-                        height={168}
-                        className={styles.heroThumbnail}
-                      />
-                    )}
-                    {isItemOwned(heroOption.id) && (
-                      <span className={styles.ownedBadge}>✓</span>
-                    )}
-                    {!isItemOwned(heroOption.id) && heroOption.cost > 0 && (
-                      <span className={styles.costBadge}>
-                        {heroOption.cost}💎
-                      </span>
-                    )}
-                  </div>
-                  <p className={styles.heroName}>{heroOption.name}</p>
-                  {heroOption.description && (
-                    <p className={styles.heroDescription}>{heroOption.description}</p>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
+        <p className={styles.subscriptionHint}>
+          {activeTab === 'character'
+            ? 'First 5 in each category (skin, outfit, accessories) free or for diamonds • Rest require subscription'
+            : 'First 5 in each category (eyes, mouth, accessory, background) free or for diamonds • Rest require subscription'}
+        </p>
 
-          {/* Accessories */}
+        <div className={styles.options}>
+          {activeTab === 'character' && (
+            <>
           <div className={styles.optionGroup}>
-            <label>Accessories</label>
-            <div className={styles.accessoryGrid}>
-              {ACCESSORIES.map((accessory) => (
-                <button
-                  key={accessory.id}
-                  className={`${styles.accessoryButton} ${
-                    isAccessoryActive(accessory.id) ? styles.active : ''
-                  } ${!canAfford(accessory.cost, accessory.id) && accessory.cost > 0 ? styles.disabled : ''}`}
-                  onClick={() => handleAccessoryToggle(accessory)}
-                  disabled={!canAfford(accessory.cost, accessory.id) && accessory.cost > 0}
-                  title={isItemOwned(accessory.id) ? 'Owned - Click to toggle' : accessory.cost === 0 ? 'Free' : `${accessory.cost} coins`}
-                >
-                  <span className={styles.accessoryIcon}>{accessory.image}</span>
-                  <span className={styles.accessoryName}>{accessory.name}</span>
-                  {isItemOwned(accessory.id) ? (
-                    <span className={styles.ownedText}>Owned</span>
-                  ) : accessory.cost > 0 ? (
-                    <span className={styles.costText}>{accessory.cost}💎</span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
+            <label>Skin</label>
+                <div className={styles.colorGrid}>
+                  {SKIN_OPTIONS.map((skin, idx) => {
+                    const subLocked = heroRequiresSubscription(idx) && !hasSubscription
+                    return (
+                      <button
+                        key={skin.id}
+                        className={`${styles.colorSwatch} ${build.skinId === skin.id ? styles.active : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                        style={{ background: skin.color }}
+                        onClick={() => handleSkinSelect(skin, idx)}
+                        title={subLocked ? 'Requires subscription' : skin.name}
+                      >
+                        {subLocked && <span className={styles.swatchSubscriptionLabel} title="Requires subscription">🔒</span>}
+                        {build.skinId === skin.id && !subLocked && <span className={styles.ownedBadge}>✓</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className={styles.optionGroup}>
+                <label>Outfit</label>
+                <div className={styles.outfitGrid}>
+                  {OUTFIT_OPTIONS.map((outfit, idx) => {
+                    const subLocked = heroRequiresSubscription(idx) && !hasSubscription
+                    return (
+                      <button
+                        key={outfit.id}
+                        className={`${styles.outfitCard} ${build.outfitId === outfit.id ? styles.active : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                        onClick={() => handleOutfitSelect(outfit, idx)}
+                        title={subLocked ? 'Requires subscription' : `${outfit.name}${outfit.cost > 0 ? ` – ${outfit.cost}💎` : ''}`}
+                      >
+                        <div className={styles.outfitPreview} style={{ background: `linear-gradient(180deg, ${outfit.bodyColor} 50%, ${outfit.legColor} 50%)` }} />
+                        <span className={styles.heroName}>{outfit.name}</span>
+                        {subLocked ? <span className={styles.subscribeText}>Subscribe</span> : !isItemOwned(outfit.id) && outfit.cost > 0 && <span className={styles.costText}>{outfit.cost}💎</span>}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+              <div className={styles.optionGroup}>
+                <label>Accessories</label>
+                <div className={styles.accessoryGrid}>
+                  {CHARACTER_ACCESSORIES.map((acc, idx) => {
+                    const subLocked = heroRequiresSubscription(idx) && !hasSubscription
+                    const active = isCharacterAccessoryActive(acc.id)
+                    return (
+                      <button
+                        key={acc.id}
+                        className={`${styles.accessoryButton} ${active ? styles.active : ''} ${subLocked ? styles.subscriptionLocked : ''} ${!subLocked && !canAfford(acc.cost, acc.id) && acc.cost > 0 ? styles.disabled : ''}`}
+                        onClick={() => handleCharacterAccessoryToggle(acc, idx)}
+                        disabled={!subLocked && !canAfford(acc.cost, acc.id) && acc.cost > 0}
+                        title={subLocked ? 'Subscribe' : acc.name}
+                      >
+                        <span className={styles.accessoryIcon}>{acc.type === 'crown' ? '👑' : acc.type === 'cape' ? '🦸' : acc.type === 'belt' ? '⛑️' : acc.type === 'gloves' ? '🥊' : acc.type === 'wings' ? '🪽' : '—'}</span>
+                        <span className={styles.accessoryName}>{acc.name}</span>
+                        {subLocked ? <span className={styles.subscribeText}>Subscribe</span> : isItemOwned(acc.id) ? <span className={styles.ownedText}>Owned</span> : acc.cost > 0 ? <span className={styles.costText}>{acc.cost}💎</span> : null}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
             </>
           )}
 
-          {activeTab === 'icon' && (
+          {activeTab === 'face' && (
             <>
-              {/* Eyes */}
-              <div className={styles.optionGroup}>
-                <label>Eyes</label>
+          <div className={styles.faceSectionIntro}>
+            <h3 className={styles.faceSectionTitle}>Customize your hero&apos;s face</h3>
+            <p className={styles.faceSectionDesc}>Pick eyes, mouth, a fun accessory, and a background.</p>
+          </div>
+
+          <div className={styles.optionGroup}>
+            <label>Eyes</label>
                 <div className={styles.iconGrid}>
-                  {EYES_OPTIONS.map((element) => (
+                  {EYES_OPTIONS.map((element, idx) => {
+                    const subLocked = faceOptionRequiresSubscription(idx) && !hasSubscription
+                    return (
                     <button
                       key={element.id}
                       className={`${styles.iconButton} ${
                         isIconElementSelected(element.id, 'eyes') ? styles.active : ''
-                      } ${!canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''}`}
-                      onClick={() => handleIconElementSelect(element)}
-                      disabled={!canAfford(element.cost, element.id) && element.cost > 0}
-                      title={isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} coins`}
+                      } ${!subLocked && !canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                      onClick={() => handleIconElementSelect(element, idx)}
+                      disabled={!subLocked && !canAfford(element.cost, element.id) && element.cost > 0}
+                      title={subLocked ? 'Subscribe to unlock' : isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} diamonds`}
                     >
                       <span className={styles.iconEmoji}>{element.emoji}</span>
                       <span className={styles.iconName}>{element.name}</span>
-                      {isItemOwned(element.id) ? (
+                      {subLocked ? (
+                        <span className={styles.subscribeText}>Subscribe</span>
+                      ) : isItemOwned(element.id) ? (
                         <span className={styles.ownedText}>Owned</span>
                       ) : element.cost > 0 ? (
                         <span className={styles.costText}>{element.cost}💎</span>
                       ) : null}
                     </button>
-                  ))}
+                  )})}
                 </div>
               </div>
 
@@ -275,25 +313,29 @@ export default function HeroCustomizer() {
               <div className={styles.optionGroup}>
                 <label>Mouth</label>
                 <div className={styles.iconGrid}>
-                  {MOUTH_OPTIONS.map((element) => (
+                  {MOUTH_OPTIONS.map((element, idx) => {
+                    const subLocked = faceOptionRequiresSubscription(idx) && !hasSubscription
+                    return (
                     <button
                       key={element.id}
                       className={`${styles.iconButton} ${
                         isIconElementSelected(element.id, 'mouth') ? styles.active : ''
-                      } ${!canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''}`}
-                      onClick={() => handleIconElementSelect(element)}
-                      disabled={!canAfford(element.cost, element.id) && element.cost > 0}
-                      title={isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} coins`}
+                      } ${!subLocked && !canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                      onClick={() => handleIconElementSelect(element, idx)}
+                      disabled={!subLocked && !canAfford(element.cost, element.id) && element.cost > 0}
+                      title={subLocked ? 'Subscribe to unlock' : isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} diamonds`}
                     >
                       <span className={styles.iconEmoji}>{element.emoji}</span>
                       <span className={styles.iconName}>{element.name}</span>
-                      {isItemOwned(element.id) ? (
+                      {subLocked ? (
+                        <span className={styles.subscribeText}>Subscribe</span>
+                      ) : isItemOwned(element.id) ? (
                         <span className={styles.ownedText}>Owned</span>
                       ) : element.cost > 0 ? (
                         <span className={styles.costText}>{element.cost}💎</span>
                       ) : null}
                     </button>
-                  ))}
+                  )})}
                 </div>
               </div>
 
@@ -301,25 +343,29 @@ export default function HeroCustomizer() {
               <div className={styles.optionGroup}>
                 <label>Icon Accessories</label>
                 <div className={styles.iconGrid}>
-                  {ACCESSORY_OPTIONS.map((element) => (
+                  {ACCESSORY_OPTIONS.map((element, idx) => {
+                    const subLocked = faceOptionRequiresSubscription(idx) && !hasSubscription
+                    return (
                     <button
                       key={element.id}
                       className={`${styles.iconButton} ${
                         isIconElementSelected(element.id, 'accessory') ? styles.active : ''
-                      } ${!canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''}`}
-                      onClick={() => handleIconElementSelect(element)}
-                      disabled={!canAfford(element.cost, element.id) && element.cost > 0}
-                      title={isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} coins`}
+                      } ${!subLocked && !canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                      onClick={() => handleIconElementSelect(element, idx)}
+                      disabled={!subLocked && !canAfford(element.cost, element.id) && element.cost > 0}
+                      title={subLocked ? 'Subscribe to unlock' : isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} diamonds`}
                     >
                       <span className={styles.iconEmoji}>{element.emoji || 'None'}</span>
                       <span className={styles.iconName}>{element.name}</span>
-                      {isItemOwned(element.id) ? (
+                      {subLocked ? (
+                        <span className={styles.subscribeText}>Subscribe</span>
+                      ) : isItemOwned(element.id) ? (
                         <span className={styles.ownedText}>Owned</span>
                       ) : element.cost > 0 ? (
                         <span className={styles.costText}>{element.cost}💎</span>
                       ) : null}
                     </button>
-                  ))}
+                  )})}
                 </div>
               </div>
 
@@ -327,25 +373,29 @@ export default function HeroCustomizer() {
               <div className={styles.optionGroup}>
                 <label>Background</label>
                 <div className={styles.iconGrid}>
-                  {BACKGROUND_OPTIONS.map((element) => (
+                  {BACKGROUND_OPTIONS.map((element, idx) => {
+                    const subLocked = faceOptionRequiresSubscription(idx) && !hasSubscription
+                    return (
                     <button
                       key={element.id}
                       className={`${styles.iconButton} ${
                         isIconElementSelected(element.id, 'background') ? styles.active : ''
-                      } ${!canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''}`}
-                      onClick={() => handleIconElementSelect(element)}
-                      disabled={!canAfford(element.cost, element.id) && element.cost > 0}
-                      title={isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} coins`}
+                      } ${!subLocked && !canAfford(element.cost, element.id) && element.cost > 0 ? styles.disabled : ''} ${subLocked ? styles.subscriptionLocked : ''}`}
+                      onClick={() => handleIconElementSelect(element, idx)}
+                      disabled={!subLocked && !canAfford(element.cost, element.id) && element.cost > 0}
+                      title={subLocked ? 'Subscribe to unlock' : isItemOwned(element.id) ? 'Owned' : element.cost === 0 ? 'Free' : `${element.cost} diamonds`}
                     >
                       <span className={styles.iconEmoji}>{element.emoji}</span>
                       <span className={styles.iconName}>{element.name}</span>
-                      {isItemOwned(element.id) ? (
+                      {subLocked ? (
+                        <span className={styles.subscribeText}>Subscribe</span>
+                      ) : isItemOwned(element.id) ? (
                         <span className={styles.ownedText}>Owned</span>
                       ) : element.cost > 0 ? (
                         <span className={styles.costText}>{element.cost}💎</span>
                       ) : null}
                     </button>
-                  ))}
+                  )})}
                 </div>
               </div>
             </>

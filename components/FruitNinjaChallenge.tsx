@@ -18,19 +18,18 @@ interface FallingObject {
 
 interface FruitNinjaChallengeProps {
   challenge: Challenge
-  onComplete: (score: number, hits: number) => void
+  onComplete: (score: number, hits: number, totalFruits: number) => void
   onCancel: () => void
 }
 
 const FRUITS = ['🍎', '🍌', '🍊', '🍇', '🍓', '🥝', '🍑', '🍉']
 const OBJECT_SIZE = 60
 const SPAWN_INTERVAL = 800 // milliseconds
-const GRAVITY = 2
+const FALL_SPEED = 3 // pixels per frame
 
 export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }: FruitNinjaChallengeProps) {
   const [isActive, setIsActive] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(challenge.duration)
-  const [objects, setObjects] = useState<FallingObject[]>([])
   const [score, setScore] = useState(0)
   const [hits, setHits] = useState(0)
   const [cameraStatus, setCameraStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -42,12 +41,22 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
   const animationFrameRef = useRef<number | null>(null)
   const detectorRef = useRef<any>(null)
   const objectIdCounterRef = useRef(0)
-  const previousHandPositionsRef = useRef<{ leftWrist: { x: number; y: number } | null; rightWrist: { x: number; y: number } | null }>({
+  const handPositionsRef = useRef<{ leftWrist: { x: number; y: number } | null; rightWrist: { x: number; y: number } | null }>({
     leftWrist: null,
     rightWrist: null,
   })
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const totalFruitsSpawnedRef = useRef(0)
+  const currentScoreRef = useRef(0)
+  const currentHitsRef = useRef(0)
+  /** Objects live in a ref so the game loop can read/update every frame without blocking on React state */
+  const objectsRef = useRef<FallingObject[]>([])
+  const isActiveRef = useRef(false)
+  /** Brief slice effect: { x, y } shown for a few frames when fruit is hit */
+  const sliceEffectsRef = useRef<{ x: number; y: number; framesLeft: number }[]>([])
+  /** So we start hand updates when detector loads after game has started */
+  const handLoopStartedRef = useRef(false)
 
   useEffect(() => {
     initializeCamera()
@@ -64,39 +73,42 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
     }
   }, [cameraStatus])
 
-  useEffect(() => {
-    if (isActive && timeRemaining > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            handleComplete()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
 
-      spawnIntervalRef.current = setInterval(() => {
-        spawnObject()
-      }, SPAWN_INTERVAL)
-    } else {
+  isActiveRef.current = isActive
+
+  // Timer and spawn: run only when isActive changes; use end-time so we don't re-run effect every second
+  useEffect(() => {
+    if (!isActive) {
       if (timerRef.current) clearInterval(timerRef.current)
       if (spawnIntervalRef.current) clearInterval(spawnIntervalRef.current)
+      return
     }
-
+    const endTime = Date.now() + challenge.duration * 1000
+    timerRef.current = setInterval(() => {
+      const left = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+      setTimeRemaining(left)
+      if (left <= 0 && timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+        handleComplete()
+      }
+    }, 1000)
+    spawnIntervalRef.current = setInterval(() => spawnObject(), SPAWN_INTERVAL)
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (spawnIntervalRef.current) clearInterval(spawnIntervalRef.current)
     }
-  }, [isActive, timeRemaining])
+  }, [isActive])
 
+  // Start game loop on next frame so we don't block React when isActive turns true
   useEffect(() => {
-    if (isActive && cameraStatus === 'ready') {
-      startGameLoop()
-    }
+    if (!isActive || cameraStatus !== 'ready') return
+    const frameId = requestAnimationFrame(() => startGameLoop())
     return () => {
+      cancelAnimationFrame(frameId)
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
     }
   }, [isActive, cameraStatus])
@@ -108,13 +120,13 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
         video: { facingMode: 'user' },
         audio: false
       })
-      
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.muted = true
-        videoRef.current.playsInline = true
-        videoRef.current.play().catch((e) => console.error('Video play error:', e))
+      const video = videoRef.current
+      if (video) {
+        video.srcObject = stream
+        video.muted = true
+        video.playsInline = true
+        await video.play().catch((e) => console.error('Video play error:', e))
       }
       setCameraStatus('ready')
     } catch (err: any) {
@@ -127,114 +139,151 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
   const spawnObject = () => {
     const canvas = canvasRef.current
     if (!canvas) return
+    const w = canvas.width || 640
+    const h = canvas.height || 480
+    if (w < OBJECT_SIZE || h < OBJECT_SIZE) return
 
+    totalFruitsSpawnedRef.current += 1
     const newObject: FallingObject = {
       id: objectIdCounterRef.current++,
-      x: Math.random() * (canvas.width - OBJECT_SIZE),
+      x: Math.random() * (w - OBJECT_SIZE),
       y: -OBJECT_SIZE,
       emoji: FRUITS[Math.floor(Math.random() * FRUITS.length)],
       speed: 2 + Math.random() * 2,
       size: OBJECT_SIZE,
       hit: false,
     }
-
-    setObjects(prev => [...prev, newObject])
+    objectsRef.current = [...objectsRef.current, newObject]
   }
 
-  const startGameLoop = async () => {
+  const startGameLoop = () => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     const video = videoRef.current
 
-    if (!canvas || !ctx || !video || !detectorRef.current) return
+    if (!canvas || !ctx || !video) return
 
-    const gameLoop = async () => {
-      if (!isActive) return
-
-      // Update and draw objects
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-      // Draw video frame
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
-
-      // Detect pose and get hand positions
-      const pose = await detectPose(detectorRef.current, video)
-      let handPositions = getHandPositions(pose)
-      
-      // Scale hand positions to canvas coordinates
-      if (handPositions.leftWrist && video.videoWidth && video.videoHeight) {
-        handPositions.leftWrist = {
-          x: (handPositions.leftWrist.x / video.videoWidth) * canvas.width,
-          y: (handPositions.leftWrist.y / video.videoHeight) * canvas.height,
-        }
+    // Ensure canvas has valid dimensions (video may not have fired loadedmetadata for srcObject)
+    const ensureCanvasSize = () => {
+      const vw = video.videoWidth || 640
+      const vh = video.videoHeight || 480
+      if (canvas.width !== vw || canvas.height !== vh) {
+        canvas.width = vw
+        canvas.height = vh
       }
-      if (handPositions.rightWrist && video.videoWidth && video.videoHeight) {
-        handPositions.rightWrist = {
-          x: (handPositions.rightWrist.x / video.videoWidth) * canvas.width,
-          y: (handPositions.rightWrist.y / video.videoHeight) * canvas.height,
+    }
+
+    // Hand-update loop: runs in background, starts when detector is ready (may load after game start)
+    const updateHands = () => {
+      if (!detectorRef.current || !isActiveRef.current) return
+      const vw = video.videoWidth || 0
+      const vh = video.videoHeight || 0
+      const cw = canvas.width || 640
+      const ch = canvas.height || 480
+      if (vw < 10 || vh < 10) {
+        setTimeout(updateHands, 100)
+        return
+      }
+      detectPose(detectorRef.current, video).then(pose => {
+        if (!isActiveRef.current) return
+        const hands = getHandPositions(pose, 0.25)
+        const nw = video.videoWidth || vw
+        const nh = video.videoHeight || vh
+        const scaleX = (x: number) => cw - (x / nw) * cw
+        const scaleY = (y: number) => (y / nh) * ch
+        handPositionsRef.current = {
+          leftWrist: hands.leftWrist ? { x: scaleX(hands.leftWrist.x), y: scaleY(hands.leftWrist.y) } : null,
+          rightWrist: hands.rightWrist ? { x: scaleX(hands.rightWrist.x), y: scaleY(hands.rightWrist.y) } : null,
         }
+        if (isActiveRef.current) setTimeout(updateHands, 80)
+      }).catch(() => { if (isActiveRef.current) setTimeout(updateHands, 80) })
+    }
+
+    const gameLoop = () => {
+      if (!isActiveRef.current) return
+
+      // Start hand tracking in next tick so first detectPose() doesn't block the game frame
+      if (!handLoopStartedRef.current && detectorRef.current && (video.videoWidth || 0) >= 10) {
+        handLoopStartedRef.current = true
+        setTimeout(updateHands, 0)
       }
 
-      // Update objects and check collisions
-      setObjects(prevObjects => {
-        const updatedObjects = prevObjects
-          .map(obj => {
-            if (obj.hit) return null
+      ensureCanvasSize()
+      const w = canvas.width
+      const h = canvas.height
+      if (w === 0 || h === 0) {
+        animationFrameRef.current = requestAnimationFrame(gameLoop)
+        return
+      }
 
-            // Update position
-            const newY = obj.y + obj.speed * GRAVITY
+      ctx.clearRect(0, 0, w, h)
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        ctx.drawImage(video, 0, 0, w, h)
+      }
 
-            // Check collision with hands
-            let hit = false
-            if (handPositions.leftWrist && checkCollision(handPositions.leftWrist, { ...obj, y: newY })) {
-              hit = true
-            }
-            if (handPositions.rightWrist && checkCollision(handPositions.rightWrist, { ...obj, y: newY })) {
-              hit = true
-            }
+      const hands = handPositionsRef.current
+      const stillAlive: FallingObject[] = []
 
-            if (hit) {
-              playSound('complete')
-              setScore(prev => prev + 10)
-              setHits(prev => prev + 1)
-              return null
-            }
+      objectsRef.current.forEach(obj => {
+        const newY = obj.y + FALL_SPEED
+        if (newY > h + obj.size) return // off screen, drop
 
-            // Remove if off screen
-            if (newY > canvas.height) {
-              return null
-            }
+        const centerX = obj.x + obj.size / 2
+        const centerY = newY + obj.size / 2
+        // Generous hit area so slicing registers easily (pose can be delayed or slightly off)
+        const hitRadius = obj.size * 2
+        const box = { x: centerX, y: centerY, size: hitRadius }
+        let hit = false
+        if (hands.leftWrist && checkCollision(hands.leftWrist, box)) hit = true
+        if (hands.rightWrist && checkCollision(hands.rightWrist, box)) hit = true
 
-            return { ...obj, y: newY }
-          })
-          .filter((obj): obj is FallingObject => obj !== null)
+        if (hit) {
+          playSound('complete')
+          currentScoreRef.current += 10
+          currentHitsRef.current += 1
+          setScore(s => s + 10)
+          setHits(ht => ht + 1)
+          sliceEffectsRef.current.push({ x: centerX, y: centerY, framesLeft: 8 })
+          return // don't add to stillAlive - fruit is sliced
+        }
 
-        // Draw objects
-        updatedObjects.forEach(obj => {
-          ctx.font = `${obj.size}px Arial`
-          ctx.textAlign = 'center'
-          ctx.textBaseline = 'middle'
-          ctx.fillText(obj.emoji, obj.x + obj.size / 2, obj.y + obj.size / 2)
-        })
+        stillAlive.push({ ...obj, y: newY })
+      })
+      objectsRef.current = stillAlive
 
-        return updatedObjects
+      // Draw fruits on top of video
+      objectsRef.current.forEach(obj => {
+        ctx.font = `${obj.size}px Arial`
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText(obj.emoji, obj.x + obj.size / 2, obj.y + obj.size / 2)
       })
 
-      // Draw hand positions (for debugging)
-      if (handPositions.leftWrist) {
+      // Draw slice effects (brief burst where fruit was hit)
+      sliceEffectsRef.current = sliceEffectsRef.current.filter(se => {
+        se.framesLeft--
+        ctx.font = '28px Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.globalAlpha = se.framesLeft / 8
+        ctx.fillText('💥', se.x, se.y)
+        ctx.globalAlpha = 1
+        return se.framesLeft > 0
+      })
+
+      if (hands.leftWrist) {
         ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
         ctx.beginPath()
-        ctx.arc(handPositions.leftWrist.x, handPositions.leftWrist.y, 30, 0, Math.PI * 2)
+        ctx.arc(hands.leftWrist.x, hands.leftWrist.y, 30, 0, Math.PI * 2)
         ctx.fill()
       }
-      if (handPositions.rightWrist) {
+      if (hands.rightWrist) {
         ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'
         ctx.beginPath()
-        ctx.arc(handPositions.rightWrist.x, handPositions.rightWrist.y, 30, 0, Math.PI * 2)
+        ctx.arc(hands.rightWrist.x, hands.rightWrist.y, 30, 0, Math.PI * 2)
         ctx.fill()
       }
 
-      previousHandPositionsRef.current = handPositions
       animationFrameRef.current = requestAnimationFrame(gameLoop)
     }
 
@@ -242,16 +291,55 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
   }
 
   const handleStart = () => {
+    objectsRef.current = []
+    sliceEffectsRef.current = []
+    handPositionsRef.current = { leftWrist: null, rightWrist: null }
+    handLoopStartedRef.current = false
+    totalFruitsSpawnedRef.current = 0
+    currentScoreRef.current = 0
+    currentHitsRef.current = 0
     setIsActive(true)
     setTimeRemaining(challenge.duration)
     setScore(0)
     setHits(0)
-    setObjects([])
+  }
+
+  /** Tap/click to slice. Use game area so we capture all taps; convert screen coords to canvas buffer (mirrored for scaleX(-1)). */
+  const handleGameAreaPointer = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isActive) return
+    e.preventDefault()
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const rect = canvas.getBoundingClientRect()
+    const relX = e.clientX - rect.left
+    const relY = e.clientY - rect.top
+    if (relX < 0 || relX > rect.width || relY < 0 || relY > rect.height) return
+    const cw = canvas.width
+    const ch = canvas.height
+    if (cw <= 0 || ch <= 0) return
+    const bufferX = cw * (1 - relX / rect.width)
+    const bufferY = ch * (relY / rect.height)
+    const point = { x: bufferX, y: bufferY }
+    objectsRef.current = objectsRef.current.filter(obj => {
+      const centerX = obj.x + obj.size / 2
+      const centerY = obj.y + obj.size / 2
+      const hitRadius = obj.size * 2
+      if (checkCollision(point, { x: centerX, y: centerY, size: hitRadius })) {
+        playSound('complete')
+        currentScoreRef.current += 10
+        currentHitsRef.current += 1
+        setScore(s => s + 10)
+        setHits(ht => ht + 1)
+        sliceEffectsRef.current.push({ x: centerX, y: centerY, framesLeft: 8 })
+        return false
+      }
+      return true
+    })
   }
 
   const handleComplete = () => {
     setIsActive(false)
-    onComplete(score, hits)
+    onComplete(currentScoreRef.current, currentHitsRef.current, totalFruitsSpawnedRef.current)
   }
 
   const cleanup = () => {
@@ -273,30 +361,23 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (canvas && videoRef.current) {
-      const resizeCanvas = () => {
-        if (videoRef.current) {
-          canvas.width = videoRef.current.videoWidth || 640
-          canvas.height = videoRef.current.videoHeight || 480
-        }
-      }
-      videoRef.current.addEventListener('loadedmetadata', resizeCanvas)
-      resizeCanvas()
-      return () => {
-        videoRef.current?.removeEventListener('loadedmetadata', resizeCanvas)
-      }
+    const video = videoRef.current
+    if (!canvas || !video) return
+    const resizeCanvas = () => {
+      if (!videoRef.current) return
+      const vw = videoRef.current.videoWidth || 640
+      const vh = videoRef.current.videoHeight || 480
+      canvas.width = vw
+      canvas.height = vh
+    }
+    video.addEventListener('loadedmetadata', resizeCanvas)
+    video.addEventListener('loadeddata', resizeCanvas)
+    resizeCanvas()
+    return () => {
+      video.removeEventListener('loadedmetadata', resizeCanvas)
+      video.removeEventListener('loadeddata', resizeCanvas)
     }
   }, [cameraStatus])
-
-  if (cameraStatus === 'loading') {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Loading camera...</div>
-        <video ref={videoRef} autoPlay playsInline muted className={styles.videoHidden} />
-        <canvas ref={canvasRef} className={styles.canvasHidden} />
-      </div>
-    )
-  }
 
   if (cameraStatus === 'error') {
     return (
@@ -304,7 +385,6 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
         <div className={styles.error}>
           <p>{error || 'Camera access denied'}</p>
           <button className={styles.button} onClick={initializeCamera}>Try Again</button>
-          <button className={styles.button} onClick={handleCancel}>Cancel</button>
         </div>
       </div>
     )
@@ -314,19 +394,26 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
     <div className={styles.container}>
       <h2 className={styles.title}>🍎 Fruit Ninja Challenge</h2>
       
-      <div className={styles.gameArea}>
+      <div
+        className={styles.gameArea}
+        onPointerDown={handleGameAreaPointer}
+        style={{ touchAction: 'none', cursor: isActive ? 'crosshair' : 'default' }}
+      >
+        {cameraStatus === 'loading' && (
+          <div className={styles.loadingOverlay}>Loading camera...</div>
+        )}
         <video ref={videoRef} autoPlay playsInline muted className={styles.video} />
-        <canvas ref={canvasRef} className={styles.canvas} />
+        <canvas
+          ref={canvasRef}
+          className={styles.canvas}
+          aria-label="Tap or click fruits to slice them"
+        />
         
         {isActive && (
           <div className={styles.gameOverlay}>
             <div className={styles.score}>🍎 Score: {score}</div>
             <div className={styles.timer}>⏱️ 0:{timeRemaining.toString().padStart(2, '0')}</div>
-            <div className={styles.hits}>
-              <span>❤️</span>
-              <span>❤️</span>
-              <span>❤️</span>
-            </div>
+            <div className={styles.hits}>Sliced: {hits} 🍎</div>
           </div>
         )}
       </div>
@@ -337,18 +424,13 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
             🚀 Start Challenge!
           </button>
         ) : (
-          <button className={styles.stopButton} onClick={handleComplete}>
-            ⏹️ Finish Early
-          </button>
+          <p className={styles.recordingHint}>Complete the challenge before time runs out!</p>
         )}
-        <button className={styles.cancelButton} onClick={handleCancel}>
-          Cancel
-        </button>
       </div>
 
       <div className={styles.instructions}>
-        <p>💡 Wave your hands to hit the falling fruits!</p>
-        <p>Move your arms up and down quickly to catch them all!</p>
+        <p>💡 Tap or click fruits to slice them — or wave your hands in front of the camera!</p>
+        <p>Slice as many as you can before time runs out.</p>
       </div>
     </div>
   )

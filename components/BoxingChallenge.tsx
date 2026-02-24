@@ -19,7 +19,7 @@ interface Target {
 
 interface BoxingChallengeProps {
   challenge: Challenge
-  onComplete: (score: number, punches: number) => void
+  onComplete: (score: number, punches: number, totalTargets: number) => void
   onCancel: () => void
 }
 
@@ -50,6 +50,12 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
   })
   const spawnIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const totalTargetsSpawnedRef = useRef(0)
+  const currentScoreRef = useRef(0)
+  const currentPunchesRef = useRef(0)
+  const isActiveRef = useRef(false)
+  const handPositionsRef = useRef<{ leftWrist: { x: number; y: number } | null; rightWrist: { x: number; y: number } | null; leftElbow: { x: number; y: number } | null; rightElbow: { x: number; y: number } | null }>({ leftWrist: null, rightWrist: null, leftElbow: null, rightElbow: null })
+  const handLoopStartedRef = useRef(false)
 
   useEffect(() => {
     initializeCamera()
@@ -66,39 +72,41 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
     }
   }, [cameraStatus])
 
-  useEffect(() => {
-    if (isActive && timeRemaining > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            handleComplete()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
+  isActiveRef.current = isActive
 
-      spawnIntervalRef.current = setInterval(() => {
-        spawnTarget()
-      }, SPAWN_INTERVAL)
-    } else {
+  // Timer and spawn: run only when isActive changes; use end-time so we don't re-run effect every second
+  useEffect(() => {
+    if (!isActive) {
       if (timerRef.current) clearInterval(timerRef.current)
       if (spawnIntervalRef.current) clearInterval(spawnIntervalRef.current)
+      return
     }
-
+    const endTime = Date.now() + challenge.duration * 1000
+    timerRef.current = setInterval(() => {
+      const left = Math.max(0, Math.ceil((endTime - Date.now()) / 1000))
+      setTimeRemaining(left)
+      if (left <= 0 && timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+        handleComplete()
+      }
+    }, 1000)
+    spawnIntervalRef.current = setInterval(() => spawnTarget(), SPAWN_INTERVAL)
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
       if (spawnIntervalRef.current) clearInterval(spawnIntervalRef.current)
     }
-  }, [isActive, timeRemaining])
+  }, [isActive])
 
+  // Start game loop on next frame so we don't block React when isActive turns true
   useEffect(() => {
-    if (isActive && cameraStatus === 'ready') {
-      startGameLoop()
-    }
+    if (!isActive || cameraStatus !== 'ready') return
+    const frameId = requestAnimationFrame(() => startGameLoop())
     return () => {
+      cancelAnimationFrame(frameId)
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+        animationFrameRef.current = null
       }
     }
   }, [isActive, cameraStatus])
@@ -110,13 +118,13 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
         video: { facingMode: 'user' },
         audio: false
       })
-      
       streamRef.current = stream
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        videoRef.current.muted = true
-        videoRef.current.playsInline = true
-        videoRef.current.play().catch((e) => console.error('Video play error:', e))
+      const video = videoRef.current
+      if (video) {
+        video.srcObject = stream
+        video.muted = true
+        video.playsInline = true
+        await video.play().catch((e) => console.error('Video play error:', e))
       }
       setCameraStatus('ready')
     } catch (err: any) {
@@ -130,6 +138,7 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
     const canvas = canvasRef.current
     if (!canvas) return
 
+    totalTargetsSpawnedRef.current += 1
     const newTarget: Target = {
       id: targetIdCounterRef.current++,
       x: Math.random() * (canvas.width - TARGET_SIZE),
@@ -144,27 +153,71 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
     setTargets(prev => [...prev, newTarget])
   }
 
-  const startGameLoop = async () => {
+  const startGameLoop = () => {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     const video = videoRef.current
 
-    if (!canvas || !ctx || !video || !detectorRef.current) return
+    if (!canvas || !ctx || !video) return
 
-    const gameLoop = async () => {
-      if (!isActive) return
+    const ensureCanvasSize = () => {
+      const vw = video.videoWidth || 640
+      const vh = video.videoHeight || 480
+      if (canvas.width !== vw || canvas.height !== vh) {
+        canvas.width = vw
+        canvas.height = vh
+      }
+    }
 
-      // Update and draw targets
+    // Background pose loop: do not block the game loop
+    const updateHands = () => {
+      if (!detectorRef.current || !isActiveRef.current) return
+      const vw = video.videoWidth || 0
+      const vh = video.videoHeight || 0
+      if (vw < 10 || vh < 10) {
+        setTimeout(updateHands, 100)
+        return
+      }
+      detectPose(detectorRef.current, video).then(pose => {
+        if (!isActiveRef.current) return
+        const hands = getHandPositions(pose)
+        const nw = video.videoWidth || vw
+        const nh = video.videoHeight || vh
+        const cw = canvas.width || 640
+        const ch = canvas.height || 480
+        const scaleX = (x: number) => cw - (x / nw) * cw
+        const scaleY = (y: number) => (y / nh) * ch
+        handPositionsRef.current = {
+          leftWrist: hands.leftWrist ? { x: scaleX(hands.leftWrist.x), y: scaleY(hands.leftWrist.y) } : null,
+          rightWrist: hands.rightWrist ? { x: scaleX(hands.rightWrist.x), y: scaleY(hands.rightWrist.y) } : null,
+          leftElbow: hands.leftElbow ? { x: scaleX(hands.leftElbow.x), y: scaleY(hands.leftElbow.y) } : null,
+          rightElbow: hands.rightElbow ? { x: scaleX(hands.rightElbow.x), y: scaleY(hands.rightElbow.y) } : null,
+        }
+        if (isActiveRef.current) setTimeout(updateHands, 80)
+      }).catch(() => { if (isActiveRef.current) setTimeout(updateHands, 80) })
+    }
+
+    const gameLoop = () => {
+      if (!isActiveRef.current) return
+
+      ensureCanvasSize()
+      if (canvas.width === 0 || canvas.height === 0) {
+        animationFrameRef.current = requestAnimationFrame(gameLoop)
+        return
+      }
+
+      if (!handLoopStartedRef.current && detectorRef.current && (video.videoWidth || 0) >= 10) {
+        handLoopStartedRef.current = true
+        setTimeout(updateHands, 0)
+      }
+
       ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (video.videoWidth > 0 && video.videoHeight > 0) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      }
 
-      // Draw video frame
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const handPositions = handPositionsRef.current
 
-      // Detect pose and get hand positions
-      const pose = await detectPose(detectorRef.current, video)
-      let handPositions = getHandPositions(pose)
-      
-      // Track movement for fallback scoring
       if (handPositions.leftWrist && previousHandPositionsRef.current.leftWrist) {
         if (isHandMoving(handPositions.leftWrist, previousHandPositionsRef.current.leftWrist, 5)) {
           setMovementCount(prev => prev + 1)
@@ -175,149 +228,74 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
           setMovementCount(prev => prev + 1)
         }
       }
-      
-      // Scale hand positions to canvas coordinates
-      if (video.videoWidth && video.videoHeight) {
-        if (handPositions.leftWrist) {
-          handPositions.leftWrist = {
-            x: (handPositions.leftWrist.x / video.videoWidth) * canvas.width,
-            y: (handPositions.leftWrist.y / video.videoHeight) * canvas.height,
-          }
-        }
-        if (handPositions.rightWrist) {
-          handPositions.rightWrist = {
-            x: (handPositions.rightWrist.x / video.videoWidth) * canvas.width,
-            y: (handPositions.rightWrist.y / video.videoHeight) * canvas.height,
-          }
-        }
-        if (handPositions.leftElbow) {
-          handPositions.leftElbow = {
-            x: (handPositions.leftElbow.x / video.videoWidth) * canvas.width,
-            y: (handPositions.leftElbow.y / video.videoHeight) * canvas.height,
-          }
-        }
-        if (handPositions.rightElbow) {
-          handPositions.rightElbow = {
-            x: (handPositions.rightElbow.x / video.videoWidth) * canvas.width,
-            y: (handPositions.rightElbow.y / video.videoHeight) * canvas.height,
-          }
-        }
-      }
 
-      // Update targets and check collisions
       setTargets(prevTargets => {
         const updatedTargets = prevTargets
           .map(target => {
             if (target.hit) return null
+            const newLifetime = target.lifetime + 16
+            if (newLifetime >= target.maxLifetime) return null
 
-            // Update lifetime
-            const newLifetime = target.lifetime + 16 // ~60fps
-            if (newLifetime >= target.maxLifetime) {
-              return null // Target expired
-            }
-
-            // Check for punches hitting targets - simplified detection
             let hit = false
-            
-            // Check left hand
             if (handPositions.leftWrist) {
               const distance = Math.sqrt(
                 Math.pow(handPositions.leftWrist.x - (target.x + target.size / 2), 2) +
                 Math.pow(handPositions.leftWrist.y - (target.y + target.size / 2), 2)
               )
-              
-              // Larger hit radius for easier hits
               const hitRadius = target.size / 2 + 20
-              
               if (distance < hitRadius) {
-                // If hand is moving or extended, count as hit
                 if (previousHandPositionsRef.current.leftWrist) {
-                  const isMoving = isPunching(
-                    handPositions.leftWrist,
-                    handPositions.leftElbow,
-                    previousHandPositionsRef.current.leftWrist
-                  )
-                  if (isMoving || distance < target.size / 2) {
-                    hit = true
-                  }
-                } else {
-                  // First frame - just check proximity
-                  hit = true
-                }
+                  if (isPunching(handPositions.leftWrist, handPositions.leftElbow, previousHandPositionsRef.current.leftWrist) || distance < target.size / 2) hit = true
+                } else hit = true
               }
             }
-
-            // Check right hand
             if (!hit && handPositions.rightWrist) {
               const distance = Math.sqrt(
                 Math.pow(handPositions.rightWrist.x - (target.x + target.size / 2), 2) +
                 Math.pow(handPositions.rightWrist.y - (target.y + target.size / 2), 2)
               )
-              
-              // Larger hit radius for easier hits
               const hitRadius = target.size / 2 + 20
-              
               if (distance < hitRadius) {
-                // If hand is moving or extended, count as hit
                 if (previousHandPositionsRef.current.rightWrist) {
-                  const isMoving = isPunching(
-                    handPositions.rightWrist,
-                    handPositions.rightElbow,
-                    previousHandPositionsRef.current.rightWrist
-                  )
-                  if (isMoving || distance < target.size / 2) {
-                    hit = true
-                  }
-                } else {
-                  // First frame - just check proximity
-                  hit = true
-                }
+                  if (isPunching(handPositions.rightWrist, handPositions.rightElbow, previousHandPositionsRef.current.rightWrist) || distance < target.size / 2) hit = true
+                } else hit = true
               }
             }
 
             if (hit) {
               playSound('complete')
+              currentScoreRef.current += 20
+              currentPunchesRef.current += 1
               setScore(prev => prev + 20)
               setPunches(prev => prev + 1)
               return null
             }
-
             return { ...target, lifetime: newLifetime }
           })
-          .filter((target): target is Target => target !== null)
+          .filter((t): t is Target => t !== null)
 
-        // Draw targets
         updatedTargets.forEach(target => {
           const alpha = 1 - (target.lifetime / target.maxLifetime)
           ctx.globalAlpha = alpha
           ctx.font = `${target.size}px Arial`
           ctx.textAlign = 'center'
           ctx.textBaseline = 'middle'
-          ctx.fillText(
-            target.emoji,
-            target.x + target.size / 2,
-            target.y + target.size / 2
-          )
-          
-          // Draw target circle
+          ctx.fillText(target.emoji, target.x + target.size / 2, target.y + target.size / 2)
           ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'
           ctx.lineWidth = 3
           ctx.beginPath()
-          ctx.arc(
-            target.x + target.size / 2,
-            target.y + target.size / 2,
-            target.size / 2,
-            0,
-            Math.PI * 2
-          )
+          ctx.arc(target.x + target.size / 2, target.y + target.size / 2, target.size / 2, 0, Math.PI * 2)
           ctx.stroke()
           ctx.globalAlpha = 1
         })
-
         return updatedTargets
       })
 
-      // Draw hand positions (for debugging)
+      previousHandPositionsRef.current = {
+        leftWrist: handPositions.leftWrist,
+        rightWrist: handPositions.rightWrist,
+      }
+
       if (handPositions.leftWrist) {
         ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
         ctx.beginPath()
@@ -331,11 +309,6 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
         ctx.fill()
       }
 
-      previousHandPositionsRef.current = {
-        leftWrist: handPositions.leftWrist,
-        rightWrist: handPositions.rightWrist,
-      }
-      
       animationFrameRef.current = requestAnimationFrame(gameLoop)
     }
 
@@ -343,20 +316,26 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
   }
 
   const handleStart = () => {
+    handLoopStartedRef.current = false
+    handPositionsRef.current = { leftWrist: null, rightWrist: null, leftElbow: null, rightElbow: null }
+    previousHandPositionsRef.current = { leftWrist: null, rightWrist: null }
     setIsActive(true)
     setTimeRemaining(challenge.duration)
     setScore(0)
     setPunches(0)
     setMovementCount(0)
     setTargets([])
+    totalTargetsSpawnedRef.current = 0
+    currentScoreRef.current = 0
+    currentPunchesRef.current = 0
   }
 
   const handleComplete = () => {
     setIsActive(false)
-    // Use movement count as fallback if punches are low
-    const finalPunches = punches > 0 ? punches : Math.floor(movementCount / 10)
-    const finalScore = score > 0 ? score : Math.floor(movementCount * 2)
-    onComplete(finalScore, finalPunches)
+    const totalTargets = totalTargetsSpawnedRef.current
+    const finalScore = currentScoreRef.current
+    const finalPunches = currentPunchesRef.current
+    onComplete(finalScore, finalPunches, totalTargets)
   }
 
   const cleanup = () => {
@@ -393,23 +372,12 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
     }
   }, [cameraStatus])
 
-  if (cameraStatus === 'loading') {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loading}>Loading camera...</div>
-        <video ref={videoRef} autoPlay playsInline muted className={styles.videoHidden} />
-        <canvas ref={canvasRef} className={styles.canvasHidden} />
-      </div>
-    )
-  }
-
   if (cameraStatus === 'error') {
     return (
       <div className={styles.container}>
         <div className={styles.error}>
           <p>{error || 'Camera access denied'}</p>
           <button className={styles.button} onClick={initializeCamera}>Try Again</button>
-          <button className={styles.button} onClick={handleCancel}>Cancel</button>
         </div>
       </div>
     )
@@ -420,6 +388,9 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
       <h2 className={styles.title}>🥊 Boxing Challenge</h2>
       
       <div className={styles.gameArea}>
+        {cameraStatus === 'loading' && (
+          <div className={styles.loadingOverlay}>Loading camera...</div>
+        )}
         <video ref={videoRef} autoPlay playsInline muted className={styles.video} />
         <canvas ref={canvasRef} className={styles.canvas} />
         
@@ -438,13 +409,8 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
             🚀 Start Challenge!
           </button>
         ) : (
-          <button className={styles.stopButton} onClick={handleComplete}>
-            ⏹️ Finish Early
-          </button>
+          <p className={styles.recordingHint}>Complete the challenge before time runs out!</p>
         )}
-        <button className={styles.cancelButton} onClick={handleCancel}>
-          Cancel
-        </button>
       </div>
 
       <div className={styles.instructions}>

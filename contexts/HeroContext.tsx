@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { Hero } from '@/types/hero'
 import { getInitialHero, applyTimeDecay, addCoinsToHero } from '@/utils/heroUtils'
 import { useConfig } from '@/contexts/ConfigContext'
+import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID } from '@/data/characterOptions'
 
 interface HeroContextType {
   hero: Hero
@@ -25,29 +26,20 @@ function loadHeroFromStorage(initialCoins: number): Hero {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return getInitialHero(initialCoins)
     const parsed = JSON.parse(stored)
-    // Validate shape - check for new structure (selectedHeroId) or old structure (skinColor)
-    const hasNewStructure = parsed?.cosmetics?.selectedHeroId
-    const hasOldStructure = parsed?.cosmetics?.skinColor
-    
-    if (!parsed?.stats?.level || (!hasNewStructure && !hasOldStructure)) {
-      return getInitialHero(initialCoins)
-    }
-    
-    // Migrate from old structure to new structure if needed
-    if (hasOldStructure && !hasNewStructure) {
-      parsed.cosmetics = {
-        selectedHeroId: 'superhero-green', // Default hero
-        accessories: parsed.cosmetics.accessories || [],
-        iconCustomization: {
-          eyes: 'eyes-default',
-          mouth: 'mouth-smile',
-          accessory: 'acc-none',
-          background: 'bg-default'
-        }
+    if (!parsed?.stats?.level) return getInitialHero(initialCoins)
+
+    // Ensure characterBuild exists (migrate from old selectedHeroId / image heroes)
+    if (!parsed.cosmetics.characterBuild) {
+      parsed.cosmetics.characterBuild = {
+        skinId: DEFAULT_SKIN_ID,
+        outfitId: DEFAULT_OUTFIT_ID,
+        accessoryIds: [DEFAULT_ACCESSORY_ID],
       }
-      parsed.ownedItems = parsed.ownedItems || ['superhero-green']
+      if (!parsed.ownedItems) parsed.ownedItems = []
+      const defaults = [DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID]
+      defaults.forEach(id => { if (!parsed.ownedItems.includes(id)) parsed.ownedItems.push(id) })
     }
-    
+
     // Ensure iconCustomization exists
     if (!parsed.cosmetics.iconCustomization) {
       parsed.cosmetics.iconCustomization = {
@@ -56,24 +48,19 @@ function loadHeroFromStorage(initialCoins: number): Hero {
         accessory: 'acc-none',
         background: 'bg-default'
       }
-      // Add default icon elements to ownedItems
       if (!parsed.ownedItems) parsed.ownedItems = []
-      if (!parsed.ownedItems.includes('eyes-default')) parsed.ownedItems.push('eyes-default')
-      if (!parsed.ownedItems.includes('mouth-smile')) parsed.ownedItems.push('mouth-smile')
-      if (!parsed.ownedItems.includes('acc-none')) parsed.ownedItems.push('acc-none')
-      if (!parsed.ownedItems.includes('bg-default')) parsed.ownedItems.push('bg-default')
+      ;['eyes-default', 'mouth-smile', 'acc-none', 'bg-default'].forEach(id => {
+        if (!parsed.ownedItems.includes(id)) parsed.ownedItems.push(id)
+      })
     }
-    
-    // Ensure ownedItems exists
+
     if (!parsed.ownedItems || !Array.isArray(parsed.ownedItems)) {
-      parsed.ownedItems = [parsed.cosmetics.selectedHeroId || 'superhero-green']
+      parsed.ownedItems = [DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID]
     }
-    
-    // Ensure accessories exists
-    if (!parsed.cosmetics.accessories || !Array.isArray(parsed.cosmetics.accessories)) {
-      parsed.cosmetics.accessories = []
+    if (!parsed.cosmetics.characterBuild.accessoryIds) {
+      parsed.cosmetics.characterBuild.accessoryIds = [DEFAULT_ACCESSORY_ID]
     }
-    
+
     return applyTimeDecay(parsed)
   } catch {
     return getInitialHero(initialCoins)

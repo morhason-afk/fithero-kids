@@ -1,14 +1,22 @@
 import { Challenge, ChallengeProgress } from '@/types/challenge'
 
+/**
+ * @param minStarsFromConfig Optional override from admin config. If provided, used instead of challenge.unlockRequirement.minStars.
+ */
 export function isChallengeUnlocked(
   challenge: Challenge,
-  progress: ChallengeProgress[]
+  progress: ChallengeProgress[],
+  minStarsFromConfig?: number
 ): boolean {
   // First challenge is always unlocked
   if (challenge.order === 1) return true
 
   // If no unlock requirement, it's unlocked
   if (!challenge.unlockRequirement) return true
+
+  const requiredStars = typeof minStarsFromConfig === 'number'
+    ? minStarsFromConfig
+    : challenge.unlockRequirement.minStars
 
   // Find the previous challenge's progress
   const previousProgress = progress.find(
@@ -18,7 +26,7 @@ export function isChallengeUnlocked(
   // Unlocked if previous challenge has required stars
   return (
     previousProgress !== undefined &&
-    previousProgress.bestStars >= challenge.unlockRequirement.minStars
+    previousProgress.bestStars >= requiredStars
   )
 }
 

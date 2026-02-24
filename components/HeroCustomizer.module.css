@@ -1,5 +1,6 @@
 .openButton {
-  background: var(--gradient-hero);
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%);
+  background: var(--gradient-hero, linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%));
   color: white;
   padding: 12px 24px;
   border-radius: 16px;
@@ -27,6 +28,8 @@
   backdrop-filter: blur(4px);
   z-index: 999;
   animation: fadeIn 0.3s ease;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 @keyframes fadeIn {
@@ -54,6 +57,8 @@
   z-index: 1000;
   display: flex;
   flex-direction: column;
+  cursor: default;
+  pointer-events: auto;
 }
 
 @media (max-width: 768px) {
@@ -67,7 +72,8 @@
 }
 
 .header {
-  background: var(--gradient-hero);
+  background: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%);
+  background: var(--gradient-hero, linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%));
   padding: 16px 24px;
   display: flex;
   justify-content: space-between;
@@ -154,6 +160,38 @@
   filter: blur(40px);
 }
 
+.subscriptionHint {
+  margin: 0 0 16px 0;
+  padding: 10px 16px;
+  background: rgba(109, 40, 217, 0.1);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: #5B21B6;
+  font-weight: 600;
+  text-align: center;
+}
+
+.faceSectionIntro {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #EDE9FE;
+}
+
+.faceSectionTitle {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #5B21B6;
+  margin: 0 0 6px 0;
+}
+
+.faceSectionDesc {
+  font-size: 0.9rem;
+  color: #6B7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
 .options {
   padding: 24px;
   overflow-y: auto;
@@ -205,6 +243,108 @@
 
 .colorGrid,
 .buttonGrid,
+.colorGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.colorSwatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,0,0,0.2);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.colorSwatch.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.3);
+}
+
+.swatchSubscriptionLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+.outfitGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 12px;
+}
+
+.outfitCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.outfitCard:hover:not(.disabled) {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.outfitCard.active {
+  border-color: var(--primary);
+  background: #EDE9FE;
+}
+
+.outfitCard .heroName {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1F2937;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.outfitCard .subscribeText {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6D28D9;
+  margin-top: 2px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.outfitPreview {
+  width: 48px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+
+.outfitCard .costText {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 .heroGrid,
 .accessoryGrid,
 .iconGrid {
@@ -298,6 +438,26 @@
   align-items: center;
   gap: 2px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subscribeBadge {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6D28D9;
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.heroCard.subscriptionLocked {
+  opacity: 0.85;
+  border-style: dashed;
 }
 
 .ownedBadge {
@@ -455,15 +615,17 @@
   background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%);
   border: 2px solid #E5E7EB;
   border-radius: 16px;
-  padding: 16px;
+  padding: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   color: var(--primary);
   font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .accessoryButton:hover:not(.disabled) {
@@ -484,19 +646,30 @@
 }
 
 .accessoryIcon {
-  font-size: 2rem;
+  font-size: 1.75rem;
+  flex-shrink: 0;
 }
 
 .accessoryName {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .accessoryButton .costText,
-.accessoryButton .ownedText {
+.accessoryButton .ownedText,
+.accessoryButton .subscribeText {
   font-size: 0.75rem;
-  font-weight: 400;
+  font-weight: 600;
   margin-top: 4px;
+}
+
+.accessoryButton .subscribeText {
+  color: #6D28D9;
 }
 
 .iconButton {
@@ -510,9 +683,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 10px;
   background: white;
-  min-height: 100px;
+  min-height: 90px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .iconButton:hover:not(.disabled) {
@@ -532,20 +707,47 @@
   cursor: not-allowed;
 }
 
+.iconButton.subscriptionLocked {
+  border-style: dashed;
+  border-color: #A78BFA;
+  background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+}
+
+.iconButton.subscriptionLocked:hover {
+  border-color: #8B5CF6;
+}
+
 .iconEmoji {
-  font-size: 2.5rem;
-  margin-bottom: 8px;
+  font-size: 1.75rem;
+  line-height: 1;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+  max-height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .iconName {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
 }
 
 .iconButton .costText,
-.iconButton .ownedText {
-  font-size: 0.75rem;
-  font-weight: 400;
-  margin-top: 4px;
+.iconButton .ownedText,
+.iconButton .subscribeText {
+  font-size: 0.65rem;
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+
+.iconButton .subscribeText {
+  color: #6D28D9;
 }

@@ -1,0 +1,12 @@
+FitHero Kids - Exercise Game
+
+TO PLAY:
+1. Install Node.js from https://nodejs.org (if not already installed).
+2. Double-click:
+   - start-game.command (Mac)
+   - start-game.bat (Windows)
+3. When the game starts, your browser will open to http://localhost:3002
+   (If it doesn't, open that address in your browser.)
+4. Allow camera access when the game asks (needed for some challenges).
+
+Have fun!

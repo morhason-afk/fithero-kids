@@ -59,25 +59,28 @@
 }
 
 .eyes {
-  margin-top: 8px;
+  margin-top: 6px;
   z-index: 2;
   line-height: 1;
 }
 
 .eyesEmoji {
-  font-size: 36px;
+  font-size: 28px;
   display: block;
   line-height: 1;
+  letter-spacing: 0.2em;
+  text-align: center;
 }
 
 .mouth {
-  margin-top: -8px;
+  margin-top: -4px;
   z-index: 2;
   line-height: 1;
 }
 
 .mouthEmoji {
-  font-size: 32px;
+  font-size: 28px;
   display: block;
   line-height: 1;
+  text-align: center;
 }

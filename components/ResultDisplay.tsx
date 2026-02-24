@@ -5,7 +5,7 @@ import { Challenge, ExerciseResult } from '@/types/challenge'
 import { useHero } from '@/contexts/HeroContext'
 import { useGame } from '@/contexts/GameContext'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
-import { getStarEmoji } from '@/utils/scoring'
+import { getStarEmoji, getResultTitle, shouldCelebrate } from '@/utils/scoring'
 import styles from './ResultDisplay.module.css'
 
 interface ResultDisplayProps {
@@ -68,19 +68,24 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
     return '💪'
   }
 
+  const title = getResultTitle(result.stars)
+  const celebrate = shouldCelebrate(result.stars)
+
   return (
     <div className={styles.container}>
-      <div className={styles.confettiBg}>
-        <div className={styles.confetti}></div>
-        <div className={styles.confetti}></div>
-        <div className={styles.confetti}></div>
-        <div className={styles.confetti}></div>
-        <div className={styles.confetti}></div>
-      </div>
-      <div className={styles.resultCard}>
-        <div className={styles.celebrationIcon}>🎉</div>
-        <h3 className={styles.title}>Amazing!</h3>
-        <p className={styles.subtitle}>You completed the challenge!</p>
+      {celebrate && (
+        <div className={styles.confettiBg}>
+          <div className={styles.confetti}></div>
+          <div className={styles.confetti}></div>
+          <div className={styles.confetti}></div>
+          <div className={styles.confetti}></div>
+          <div className={styles.confetti}></div>
+        </div>
+      )}
+      <div className={`${styles.resultCard} ${celebrate ? styles.resultCardCelebrate : styles.resultCardTryAgain}`}>
+        <div className={styles.celebrationIcon}>{celebrate ? '🎉' : '💪'}</div>
+        <h3 className={styles.title}>{title}</h3>
+        <p className={styles.subtitle}>{result.feedback}</p>
 
         {/* Stars */}
         <div className={styles.starsContainer}>
@@ -100,7 +105,7 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
           <div className={styles.rewardCard}>
             <span className={styles.rewardIcon}>💎</span>
             <p className={styles.rewardAmount}>+{displayCoins}</p>
-            <p className={styles.rewardLabel}>Coins</p>
+            <p className={styles.rewardLabel}>Diamonds</p>
           </div>
           <div className={styles.rewardCard}>
             <span className={styles.rewardIcon}>⭐</span>
@@ -109,7 +114,7 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
           </div>
         </div>
 
-        {/* New Record Badge */}
+        {/* New Record Badge - only for 3 stars */}
         {result.stars === 3 && (
           <div className={styles.recordBadge}>
             🏆 NEW PERSONAL BEST!
@@ -122,7 +127,7 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
             Home
           </button>
           <button className={styles.playAgainButton} onClick={onClose}>
-            Play Again!
+            {result.stars >= 2 ? 'Play Again!' : 'Try Again'}
           </button>
         </div>
       </div>

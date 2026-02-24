@@ -51,7 +51,12 @@ export async function detectPose(
   }
 }
 
-export function getHandPositions(pose: poseDetection.Pose | null): {
+const DEFAULT_MIN_SCORE = 0.5
+
+export function getHandPositions(
+  pose: poseDetection.Pose | null,
+  minScore: number = DEFAULT_MIN_SCORE
+): {
   leftWrist: { x: number; y: number } | null
   rightWrist: { x: number; y: number } | null
   leftElbow: { x: number; y: number } | null
@@ -73,10 +78,10 @@ export function getHandPositions(pose: poseDetection.Pose | null): {
   const rightElbow = keypoints.find(kp => kp.name === 'right_elbow')
 
   return {
-    leftWrist: leftWrist && leftWrist.score && leftWrist.score > 0.5 ? { x: leftWrist.x, y: leftWrist.y } : null,
-    rightWrist: rightWrist && rightWrist.score && rightWrist.score > 0.5 ? { x: rightWrist.x, y: rightWrist.y } : null,
-    leftElbow: leftElbow && leftElbow.score && leftElbow.score > 0.5 ? { x: leftElbow.x, y: leftElbow.y } : null,
-    rightElbow: rightElbow && rightElbow.score && rightElbow.score > 0.5 ? { x: rightElbow.x, y: rightElbow.y } : null,
+    leftWrist: leftWrist && leftWrist.score != null && leftWrist.score > minScore ? { x: leftWrist.x, y: leftWrist.y } : null,
+    rightWrist: rightWrist && rightWrist.score != null && rightWrist.score > minScore ? { x: rightWrist.x, y: rightWrist.y } : null,
+    leftElbow: leftElbow && leftElbow.score != null && leftElbow.score > minScore ? { x: leftElbow.x, y: leftElbow.y } : null,
+    rightElbow: rightElbow && rightElbow.score != null && rightElbow.score > minScore ? { x: rightElbow.x, y: rightElbow.y } : null,
   }
 }
 

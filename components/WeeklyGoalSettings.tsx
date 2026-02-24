@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
 import styles from './WeeklyGoalSettings.module.css'
 
@@ -15,6 +15,12 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
   const [notificationMethod, setNotificationMethod] = useState(goal.notificationMethod)
   const [notificationContact, setNotificationContact] = useState(goal.notificationContact || '')
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
+
   const handleSave = () => {
     updateGoal({
       starsRequired,
@@ -26,8 +32,8 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
   }
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={onClose} role="button" tabIndex={-1} aria-label="Close">
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <h2>⚙️ Configure Weekly Goal</h2>
           <button className={styles.closeButton} onClick={onClose}>

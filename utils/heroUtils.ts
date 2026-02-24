@@ -1,4 +1,5 @@
 import { HeroStats, Hero } from '@/types/hero'
+import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID } from '@/data/characterOptions'
 
 const EXPERIENCE_PER_LEVEL = 100
 const DECAY_HOURS = 48 // Hero starts decaying after 48 hours of inactivity
@@ -90,8 +91,11 @@ export function getInitialHero(initialCoins: number = 0): Hero {
       lastExerciseDate: Date.now()
     },
     cosmetics: {
-      selectedHeroId: 'superman-hero', // Default hero
-      accessories: [],
+      characterBuild: {
+        skinId: DEFAULT_SKIN_ID,
+        outfitId: DEFAULT_OUTFIT_ID,
+        accessoryIds: [DEFAULT_ACCESSORY_ID],
+      },
       iconCustomization: {
         eyes: 'eyes-default',
         mouth: 'mouth-smile',
@@ -100,8 +104,10 @@ export function getInitialHero(initialCoins: number = 0): Hero {
       }
     },
     ownedItems: [
-      'superman-hero', // Default hero is owned
-      'eyes-default', // Default icon elements are owned
+      DEFAULT_SKIN_ID,
+      DEFAULT_OUTFIT_ID,
+      DEFAULT_ACCESSORY_ID,
+      'eyes-default',
       'mouth-smile',
       'acc-none',
       'bg-default'

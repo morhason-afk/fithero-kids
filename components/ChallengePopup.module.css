@@ -12,6 +12,8 @@
   z-index: 1000;
   animation: fadeIn 0.3s ease;
   padding: 16px;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 @keyframes fadeIn {
@@ -27,13 +29,19 @@
   background: white;
   border-radius: 24px;
   padding: 0;
-  max-width: 500px;
+  max-width: min(500px, calc(100vw - 32px));
   width: 100%;
+  min-width: 0;
   max-height: 90vh;
-  overflow: hidden;
+  overflow: auto;
   position: relative;
   animation: slideUp 0.3s ease;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  pointer-events: auto;
+  box-sizing: border-box;
 }
 
 @keyframes slideUp {
@@ -71,6 +79,10 @@
 
 .challengeView {
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
 }
 
 .challengeHeader {
@@ -102,7 +114,7 @@
 }
 
 .challengeInfo {
-  padding: 24px;
+  padding: 24px 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -154,16 +166,25 @@
   color: white;
 }
 
+.startButtonWrap {
+  padding: 16px 24px 24px;
+  flex-shrink: 0;
+}
+
 .startButton {
   background: linear-gradient(to right, #4ADE80, #10B981);
   color: white;
-  padding: 16px;
+  padding: 16px 24px;
   border-radius: 16px;
   font-size: 1.125rem;
   font-weight: 700;
   transition: all 0.3s ease;
   width: 100%;
-  margin: 0 24px 24px 24px;
+  max-width: 320px;
+  margin: 0 auto;
+  display: block;
+  border: none;
+  cursor: pointer;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 

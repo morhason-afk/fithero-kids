@@ -15,7 +15,7 @@ export interface Challenge {
 
 export interface ExerciseResult {
   score: number // 0-100
-  stars: number // 1, 2, or 3
+  stars: number // 0, 1, 2, or 3
   coins: number
   feedback: string
 }

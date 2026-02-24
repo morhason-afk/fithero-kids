@@ -58,7 +58,7 @@ export default function WeeklyGoalDisplay() {
               </div>
               <div className={styles.progressBar}>
                 <div 
-                  className={`${styles.progressFill} ${styles.shimmerEffect}`}
+                  className={styles.progressFill}
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -75,6 +75,7 @@ export default function WeeklyGoalDisplay() {
         {/* Reward Preview Card */}
         <div className={styles.rewardCard}>
           <div className={styles.rewardBg}>🏆</div>
+          <span className={styles.rewardCrown} aria-hidden>👑</span>
           <div className={styles.rewardContent}>
             <p className={styles.rewardLabel}>WEEKLY REWARD</p>
             <h3 className={styles.rewardTitle}>{goal.giftDescription}!</h3>
@@ -83,7 +84,7 @@ export default function WeeklyGoalDisplay() {
                 <span>👑</span>
               </div>
               <div className={styles.rewardStats}>
-                <p className={styles.rewardValue}>+500 Coins</p>
+                <p className={styles.rewardValue}>+500 Diamonds</p>
                 <p className={styles.rewardValue}>+50 Stars</p>
               </div>
             </div>

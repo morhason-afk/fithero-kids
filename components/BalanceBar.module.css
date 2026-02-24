@@ -1,0 +1,47 @@
+.balanceBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.diamonds,
+.stars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diamonds {
+  color: #0EA5E9;
+}
+
+.diamonds .label {
+  color: #1F2937;
+}
+
+.stars {
+  color: #1F2937;
+}
+
+.stars .icon {
+  color: #FBBF24;
+}
+
+.icon {
+  font-size: 1.125rem;
+  line-height: 1;
+}
+
+.amount {
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Fredoka', sans-serif;
+  color: inherit;
+}
+
+.label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}

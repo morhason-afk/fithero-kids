@@ -8,14 +8,23 @@ export interface HeroStats {
   lastExerciseDate: number // timestamp
 }
 
+export interface CharacterBuild {
+  skinId: string
+  outfitId: string
+  accessoryIds: string[] // character accessories (cape, crown, etc.)
+}
+
 export interface HeroCosmetics {
-  selectedHeroId: string // ID of the selected hero image
-  accessories: string[] // e.g., ['crown', 'cape', 'gloves']
+  /** @deprecated Use characterBuild instead. Kept for migration. */
+  selectedHeroId?: string
+  /** Legacy hero accessories (emoji). Kept for migration. */
+  accessories?: string[]
+  characterBuild: CharacterBuild
   iconCustomization: {
-    eyes: string // Icon element ID
-    mouth: string // Icon element ID
-    accessory: string // Icon element ID (can be empty)
-    background: string // Icon element ID
+    eyes: string
+    mouth: string
+    accessory: string
+    background: string
   }
 }
 

@@ -9,17 +9,24 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .modal {
   background: white;
   border-radius: 20px;
   padding: 30px;
-  max-width: 500px;
+  max-width: min(500px, calc(100vw - 32px));
   width: 90%;
+  min-width: 0;
   max-height: 90vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  cursor: default;
+  pointer-events: auto;
+  box-sizing: border-box;
 }
 
 .header {
@@ -76,6 +83,10 @@
   font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .input:focus,

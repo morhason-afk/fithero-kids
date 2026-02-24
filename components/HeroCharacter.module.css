@@ -45,18 +45,35 @@
 }
 
 .heroLabel {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: rgba(0, 0, 0, 0.7);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6B7280;
   margin: 0 0 8px 0;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.05em;
+}
+
+.heroRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.heroLeft {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .characterWrapper {
   width: auto;
   max-width: 100%;
-  margin: 0 auto 24px;
+  margin: 0 auto 12px;
   animation: float 3s ease-in-out infinite;
   display: flex;
   align-items: center;
@@ -75,7 +92,7 @@
   overflow: visible;
   background: linear-gradient(to bottom right, #e0e7ff 0%, #f3e8ff 50%, #cffafe 100%);
   border-radius: 8px;
-  padding: 16px;
+  padding: 8px 12px;
 }
 
 .croppedHeroImage {
@@ -109,15 +126,15 @@
 
 .heroName {
   font-family: 'Fredoka', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: #333;
-  margin: 16px 0 4px 0;
+  color: #1F2937;
+  margin: 0 0 2px 0;
 }
 
 .heroSubtitle {
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 0.875rem;
+  color: #6B7280;
+  font-size: 0.8rem;
   margin: 0;
 }
 

@@ -17,7 +17,7 @@ const STORAGE_KEY_GOAL = 'exercise-game-weekly-goal'
 const STORAGE_KEY_PROGRESS = 'exercise-game-weekly-progress'
 
 const DEFAULT_GOAL: WeeklyGoal = {
-  starsRequired: 10,
+  starsRequired: 25,
   giftDescription: 'a special treat',
   notificationMethod: 'message',
 }
@@ -26,11 +26,21 @@ function loadGoalFromStorage(): WeeklyGoal {
   if (typeof window === 'undefined') return DEFAULT_GOAL
   try {
     const stored = localStorage.getItem(STORAGE_KEY_GOAL)
-    if (!stored) return DEFAULT_GOAL
+    if (!stored) return { ...DEFAULT_GOAL }
     const parsed = JSON.parse(stored)
-    return { ...DEFAULT_GOAL, ...parsed }
+    if (!parsed || typeof parsed !== 'object') return { ...DEFAULT_GOAL }
+    const starsRequired = typeof parsed.starsRequired === 'number' && parsed.starsRequired >= 1 && parsed.starsRequired <= 999
+      ? parsed.starsRequired
+      : DEFAULT_GOAL.starsRequired
+    const goal: WeeklyGoal = {
+      starsRequired,
+      giftDescription: typeof parsed.giftDescription === 'string' ? parsed.giftDescription : DEFAULT_GOAL.giftDescription,
+      notificationMethod: ['email', 'whatsapp', 'push', 'message'].includes(parsed.notificationMethod) ? parsed.notificationMethod : DEFAULT_GOAL.notificationMethod,
+      notificationContact: typeof parsed.notificationContact === 'string' ? parsed.notificationContact : undefined,
+    }
+    return goal
   } catch {
-    return DEFAULT_GOAL
+    return { ...DEFAULT_GOAL }
   }
 }
 
@@ -40,7 +50,14 @@ function loadProgressFromStorage(): WeeklyProgress | null {
     const stored = localStorage.getItem(STORAGE_KEY_PROGRESS)
     if (!stored) return null
     const parsed = JSON.parse(stored)
-    return parsed
+    if (!parsed || typeof parsed !== 'object') return null
+    if (typeof parsed.weekStartDate !== 'number' || typeof parsed.starsEarned !== 'number') return null
+    return {
+      weekStartDate: parsed.weekStartDate,
+      starsEarned: Math.max(0, Math.min(999, parsed.starsEarned)),
+      completed: Boolean(parsed.completed),
+      completedDate: typeof parsed.completedDate === 'number' ? parsed.completedDate : undefined,
+    }
   } catch {
     return null
   }
