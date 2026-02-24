@@ -15,12 +15,13 @@ export default function Footer() {
       <div className={styles.footerGrid}>
         <div className={styles.brandColumn}>
           <div className={styles.brandLogo}>
-            <span className={styles.brandIcon}>⚡</span>
+            <span className={styles.brandIcon}>🪁</span>
             <span className={styles.brandName}>FitHero</span>
           </div>
           <p className={styles.brandTagline}>
             Making fitness fun for the next generation of superheroes.
           </p>
+          <p className={styles.servedBy}>Served by YOM Games</p>
         </div>
         <div className={styles.column}>
           <h4 className={styles.columnTitle}>Game</h4>
@@ -51,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <p className={styles.copyright}>© 2024 FitHero Kids. All rights reserved.</p>
+      <p className={styles.copyright}>© 2024 FitHero Kids. Served by YOM Games. All rights reserved.</p>
       {showSupport && (
         <SupportModal supportEmail={supportEmail} onClose={() => setShowSupport(false)} />
       )}

@@ -37,9 +37,16 @@
 }
 
 .logoIcon {
-  font-size: 1.75rem;
-  color: #6C5CE7;
+  font-size: 5.25rem;
   line-height: 1;
+  filter: sepia(1) saturate(6) hue-rotate(330deg);
+}
+
+.servedBy {
+  margin: 2px 0 0 0;
+  font-size: 0.7rem;
+  color: #9CA3AF;
+  font-weight: 500;
 }
 
 .appTitle {

@@ -40,10 +40,11 @@ export default function Home() {
         <header className={styles.pageHeader}>
           <div className={styles.headerRow}>
             <div className={styles.logoContainer}>
-              <span className={styles.logoIcon} aria-hidden>⚡</span>
+              <span className={styles.logoIcon} aria-hidden>🪁</span>
               <div>
                 <h1 className={styles.appTitle}>FitHero Kids</h1>
                 <p className={styles.tagline}>Move • Play • Grow!</p>
+                <p className={styles.servedBy}>Served by YOM Games</p>
               </div>
             </div>
             <div className={styles.headerRight}>

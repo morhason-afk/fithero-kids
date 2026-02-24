@@ -31,8 +31,14 @@
 }
 
 .brandIcon {
-  font-size: 1.25rem;
-  color: #6C5CE7;
+  font-size: 3.75rem;
+  filter: sepia(1) saturate(6) hue-rotate(330deg);
+}
+
+.servedBy {
+  font-size: 0.75rem;
+  color: #6B7280;
+  margin: 6px 0 0 0;
 }
 
 .brandName {
