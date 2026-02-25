@@ -1,15 +1,15 @@
 .footer {
   margin-top: auto;
-  padding: 32px 24px 24px;
-  background: #F3F4F6;
-  border-radius: 0;
+  padding: 48px 24px 24px;
+  background: var(--card);
+  border-top: 4px solid var(--border);
 }
 
 .footerGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
-  max-width: 1000px;
+  max-width: 1024px;
   margin: 0 auto 24px;
 }
 
@@ -31,36 +31,51 @@
 }
 
 .brandIcon {
-  font-size: 3.75rem;
-  filter: sepia(1) saturate(6) hue-rotate(330deg);
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 1.1rem;
+  line-height: 1;
 }
 
 .servedBy {
   font-size: 0.75rem;
-  color: #6B7280;
+  font-weight: 700;
+  color: var(--muted-foreground);
   margin: 6px 0 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .brandName {
   font-family: 'Fredoka', sans-serif;
   font-weight: 700;
-  font-size: 1.1rem;
-  color: #1F2937;
+  font-size: 1.125rem;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .brandTagline {
   font-size: 0.875rem;
-  color: #6B7280;
+  color: var(--muted-foreground);
   line-height: 1.4;
   margin: 0;
 }
 
 .columnTitle {
   font-family: 'Fredoka', sans-serif;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   font-weight: 700;
-  color: #1F2937;
+  color: var(--foreground);
   margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .columnList {
@@ -75,12 +90,15 @@
 
 .columnList a {
   font-size: 0.875rem;
-  color: #6B7280;
+  font-weight: 700;
+  color: var(--muted-foreground);
   text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .columnList a:hover {
-  color: #6C5CE7;
+  color: var(--primary);
 }
 
 .supportLink {
@@ -88,14 +106,17 @@
   border: none;
   padding: 0;
   font-size: 0.875rem;
-  color: #6B7280;
+  font-weight: 700;
+  color: var(--muted-foreground);
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .supportLink:hover {
-  color: #6C5CE7;
+  color: var(--primary);
 }
 
 .newsletterRow {
@@ -108,35 +129,49 @@
   flex: 1;
   min-width: 0;
   padding: 10px 12px;
-  border: 2px solid #E5E7EB;
-  border-radius: 10px;
+  border: 3px solid var(--border);
+  border-radius: 12px;
   font-size: 0.875rem;
-  background: white;
+  background: var(--muted);
+  color: var(--foreground);
 }
 
 .newsletterInput:focus {
   outline: none;
-  border-color: #6C5CE7;
+  border-color: var(--primary);
+}
+
+.newsletterInput::placeholder {
+  color: var(--muted-foreground);
 }
 
 .newsletterButton {
   padding: 10px 18px;
-  background: #6C5CE7;
-  color: white;
-  border-radius: 10px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-radius: 12px;
   font-weight: 700;
   font-size: 0.875rem;
   cursor: pointer;
   white-space: nowrap;
+  border: none;
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
 }
 
 .newsletterButton:hover {
-  background: #5B4CDB;
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3);
 }
 
 .copyright {
   text-align: center;
   font-size: 0.75rem;
-  color: #9CA3AF;
+  font-weight: 700;
+  color: var(--muted-foreground);
   margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-top: 24px;
+  border-top: 4px solid var(--border);
 }

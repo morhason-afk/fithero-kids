@@ -2,13 +2,14 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { Hero } from '@/types/hero'
-import { getInitialHero, applyTimeDecay, addCoinsToHero } from '@/utils/heroUtils'
+import { getInitialHero, applyTimeDecay, addCoinsToHero, addXpToHero, EXPERIENCE_PER_LEVEL } from '@/utils/heroUtils'
 import { useConfig } from '@/contexts/ConfigContext'
-import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID } from '@/data/characterOptions'
+import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID, DEFAULT_EXPRESSION_ID } from '@/data/characterOptions'
 
 interface HeroContextType {
   hero: Hero
   addCoins: (coins: number) => void
+  addXp: (xp: number) => void
   spendCoins: (coins: number) => boolean // Returns true if successful
   updateCosmetics: (cosmetics: Partial<Hero['cosmetics']>) => void
   addOwnedItem: (itemId: string) => void
@@ -34,6 +35,7 @@ function loadHeroFromStorage(initialCoins: number): Hero {
         skinId: DEFAULT_SKIN_ID,
         outfitId: DEFAULT_OUTFIT_ID,
         accessoryIds: [DEFAULT_ACCESSORY_ID],
+        expressionId: DEFAULT_EXPRESSION_ID,
       }
       if (!parsed.ownedItems) parsed.ownedItems = []
       const defaults = [DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID]
@@ -60,6 +62,17 @@ function loadHeroFromStorage(initialCoins: number): Hero {
     if (!parsed.cosmetics.characterBuild.accessoryIds) {
       parsed.cosmetics.characterBuild.accessoryIds = [DEFAULT_ACCESSORY_ID]
     }
+    if (!parsed.cosmetics.characterBuild.expressionId) {
+      parsed.cosmetics.characterBuild.expressionId = DEFAULT_EXPRESSION_ID
+    }
+
+    // Normalize XP/level: 20 XP per level; if experience missing, derive from stored level
+    if (typeof parsed.stats.experience !== 'number') {
+      parsed.stats.experience = Math.max(0, ((parsed.stats.level ?? 1) - 1) * EXPERIENCE_PER_LEVEL)
+    }
+    if (typeof parsed.stats.experienceToNextLevel !== 'number') {
+      parsed.stats.experienceToNextLevel = EXPERIENCE_PER_LEVEL
+    }
 
     return applyTimeDecay(parsed)
   } catch {
@@ -68,7 +81,7 @@ function loadHeroFromStorage(initialCoins: number): Hero {
 }
 
 export function HeroProvider({ children }: { children: ReactNode }) {
-  const { initialCoins } = useConfig()
+  const { initialCoins, config } = useConfig()
   const [hero, setHero] = useState<Hero>(() => getInitialHero(initialCoins))
 
   // Load from localStorage after mount (client-only). Use initialCoins when no saved hero.
@@ -94,6 +107,13 @@ export function HeroProvider({ children }: { children: ReactNode }) {
 
   const addCoins = (coins: number) => {
     setHero(prev => addCoinsToHero(prev, coins))
+  }
+
+  const addXp = (xp: number) => {
+    const perLevel = typeof config.experiencePerLevel === 'number' && config.experiencePerLevel >= 1
+      ? config.experiencePerLevel
+      : EXPERIENCE_PER_LEVEL
+    setHero(prev => addXpToHero(prev, xp, perLevel))
   }
 
   const spendCoins = (coins: number): boolean => {
@@ -138,7 +158,7 @@ export function HeroProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <HeroContext.Provider value={{ hero, addCoins, spendCoins, updateCosmetics, addOwnedItem, isItemOwned, refreshHero }}>
+    <HeroContext.Provider value={{ hero, addCoins, addXp, spendCoins, updateCosmetics, addOwnedItem, isItemOwned, refreshHero }}>
       {children}
     </HeroContext.Provider>
   )

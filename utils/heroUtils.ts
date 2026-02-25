@@ -1,18 +1,25 @@
 import { HeroStats, Hero } from '@/types/hero'
-import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID } from '@/data/characterOptions'
+import { DEFAULT_SKIN_ID, DEFAULT_OUTFIT_ID, DEFAULT_ACCESSORY_ID, DEFAULT_EXPRESSION_ID } from '@/data/characterOptions'
 
-const EXPERIENCE_PER_LEVEL = 100
+export const EXPERIENCE_PER_LEVEL = 20
 const DECAY_HOURS = 48 // Hero starts decaying after 48 hours of inactivity
 const DECAY_RATE = 0.1 // Lose 10% of level per day after decay period
 
-export function calculateLevelFromExperience(experience: number): number {
-  return Math.floor(experience / EXPERIENCE_PER_LEVEL) + 1
+export function calculateLevelFromExperience(experience: number, experiencePerLevel: number = EXPERIENCE_PER_LEVEL): number {
+  const perLevel = Math.max(1, experiencePerLevel)
+  return Math.floor(experience / perLevel) + 1
 }
 
-export function calculateExperienceToNextLevel(experience: number): number {
-  const currentLevel = calculateLevelFromExperience(experience)
-  const experienceForCurrentLevel = (currentLevel - 1) * EXPERIENCE_PER_LEVEL
-  return currentLevel * EXPERIENCE_PER_LEVEL - experienceForCurrentLevel
+export function calculateExperienceToNextLevel(experience: number, experiencePerLevel: number = EXPERIENCE_PER_LEVEL): number {
+  return Math.max(1, experiencePerLevel)
+}
+
+/** XP within current level (0 to perLevel-1) and XP needed for next level. */
+export function getXpProgress(experience: number, experiencePerLevel: number = EXPERIENCE_PER_LEVEL): { xpInLevel: number; xpNeeded: number } {
+  const perLevel = Math.max(1, experiencePerLevel)
+  const xpNeeded = perLevel
+  const xpInLevel = experience % perLevel
+  return { xpInLevel, xpNeeded }
 }
 
 export function calculateHealthFromLevel(level: number): number {
@@ -26,22 +33,32 @@ export function calculateStrengthFromLevel(level: number): number {
 }
 
 export function addCoinsToHero(hero: Hero, coins: number): Hero {
-  const newExperience = hero.stats.experience + coins
-  const newLevel = calculateLevelFromExperience(newExperience)
+  return {
+    ...hero,
+    stats: {
+      ...hero.stats,
+      totalCoins: hero.stats.totalCoins + coins,
+      lastExerciseDate: Date.now()
+    }
+  }
+}
+
+/** Add XP (e.g. +1 per customization). Recalculates level from total experience. */
+export function addXpToHero(hero: Hero, xp: number, experiencePerLevel: number = EXPERIENCE_PER_LEVEL): Hero {
+  const perLevel = Math.max(1, experiencePerLevel)
+  const newExperience = hero.stats.experience + xp
+  const newLevel = calculateLevelFromExperience(newExperience, perLevel)
   const newHealth = calculateHealthFromLevel(newLevel)
   const newStrength = calculateStrengthFromLevel(newLevel)
-  
   return {
     ...hero,
     stats: {
       ...hero.stats,
       experience: newExperience,
       level: newLevel,
-      experienceToNextLevel: calculateExperienceToNextLevel(newExperience),
+      experienceToNextLevel: perLevel,
       health: newHealth,
-      strength: newStrength,
-      totalCoins: hero.stats.totalCoins + coins,
-      lastExerciseDate: Date.now()
+      strength: newStrength
     }
   }
 }
@@ -95,6 +112,7 @@ export function getInitialHero(initialCoins: number = 0): Hero {
         skinId: DEFAULT_SKIN_ID,
         outfitId: DEFAULT_OUTFIT_ID,
         accessoryIds: [DEFAULT_ACCESSORY_ID],
+        expressionId: DEFAULT_EXPRESSION_ID,
       },
       iconCustomization: {
         eyes: 'eyes-default',
@@ -107,6 +125,7 @@ export function getInitialHero(initialCoins: number = 0): Hero {
       DEFAULT_SKIN_ID,
       DEFAULT_OUTFIT_ID,
       DEFAULT_ACCESSORY_ID,
+      DEFAULT_EXPRESSION_ID,
       'eyes-default',
       'mouth-smile',
       'acc-none',

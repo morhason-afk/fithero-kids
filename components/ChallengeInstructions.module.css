@@ -2,109 +2,184 @@
   padding: 0;
   max-width: 500px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 85vh;
 }
 
 .header {
   background: linear-gradient(to right, #60A5FA, #06B6D4);
-  padding: 16px;
+  padding: 10px 12px;
   text-align: center;
   color: white;
+  flex-shrink: 0;
 }
 
 .title {
   font-family: 'Fredoka', sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   font-weight: 700;
   margin: 0;
 }
 
 .stepsContainer {
-  padding: 24px;
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
 }
 
 .step {
   display: flex;
-  gap: 16px;
+  gap: 10px;
+  align-items: flex-start;
 }
 
 .stepNumber {
-  width: 48px;
-  height: 48px;
-  background: #EDE9FE;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid var(--primary);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--primary);
 }
 
 .stepContent {
   flex: 1;
+  min-width: 0;
 }
 
 .stepTitle {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  color: #1F2937;
-  margin: 0 0 4px 0;
+  color: var(--card-foreground);
+  margin: 0 0 2px 0;
+  line-height: 1.3;
 }
 
 .stepDescription {
-  font-size: 0.875rem;
-  color: #6B7280;
+  font-size: 0.8rem;
+  color: var(--card-foreground);
+  opacity: 0.95;
   margin: 0;
+  line-height: 1.3;
 }
 
 .demoArea {
-  background: #F3F4F6;
-  border-radius: 16px;
-  padding: 24px;
+  background: var(--muted);
+  border-radius: 12px;
+  padding: 12px 16px;
   text-align: center;
-  margin: 0 24px 24px 24px;
+  margin: 0 16px 12px;
+  flex-shrink: 0;
 }
 
 .demoIcon {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 8px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 6px;
   background: linear-gradient(135deg, #FB923C, #EF4444);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
+  font-size: 2rem;
   animation: float 3s ease-in-out infinite;
 }
 
 .demoText {
-  color: #6B7280;
-  font-size: 0.875rem;
+  color: var(--card-foreground);
+  font-size: 0.8rem;
   margin: 0;
 }
 
 .actions {
-  padding: 0 24px 24px 24px;
+  padding: 0 16px 12px;
+  flex-shrink: 0;
 }
 
 .continueButton {
   width: 100%;
-  padding: 16px;
-  background: var(--gradient-hero);
-  color: white;
-  border-radius: 16px;
-  font-size: 1.125rem;
+  padding: 12px 16px;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border-radius: 12px;
+  font-size: 1rem;
   font-weight: 700;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+  transition: all 0.15s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 245, 212, 0.2);
 }
 
 .continueButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(108, 92, 231, 0.5);
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.25), 0 4px 25px rgba(0, 245, 212, 0.4);
+}
+
+@media (max-width: 480px) {
+  .container {
+    max-height: 90dvh;
+  }
+
+  .header {
+    padding: 8px 10px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  .stepsContainer {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .stepNumber {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+  }
+
+  .stepTitle {
+    font-size: 0.85rem;
+  }
+
+  .stepDescription {
+    font-size: 0.75rem;
+  }
+
+  .demoArea {
+    padding: 8px 12px;
+    margin: 0 12px 10px;
+  }
+
+  .demoIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+
+  .demoText {
+    font-size: 0.75rem;
+  }
+
+  .actions {
+    padding: 0 12px 10px;
+  }
+
+  .continueButton {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
 }

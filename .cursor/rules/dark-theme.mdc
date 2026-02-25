@@ -1,0 +1,39 @@
+---
+description: Preserve the dark game theme; use design-system tokens only in CSS
+alwaysApply: true
+---
+
+# Dark theme – do not break
+
+This app uses a **fixed dark game theme**. Any new or edited UI must use it.
+
+## Rule
+
+- **Never** add or restore light-theme colors in component CSS (no `#ffffff`, `#F3F4F6`, `#E5E7EB`, `#6B7280`, `#374151`, `#1F2937`, `white` for backgrounds, or similar).
+- **Always** use tokens from `app/design-system.css` and `app/globals.css`.
+
+## Tokens to use
+
+| Use case | Token |
+|----------|--------|
+| Page background | `var(--background)` |
+| Body text | `var(--foreground)` |
+| Cards, modals, panels | `var(--card)` |
+| Text on cards | `var(--card-foreground)` |
+| Primary actions, accents | `var(--primary)` |
+| Primary button text | `var(--primary-foreground)` |
+| Secondary actions | `var(--secondary)` / `var(--secondary-foreground)` |
+| Muted areas, inputs | `var(--muted)` |
+| Secondary text, labels | `var(--muted-foreground)` |
+| Highlights (badges, name plate) | `var(--accent)` / `var(--accent-foreground)` |
+| Borders | `var(--border)` |
+| Errors | `var(--error)` |
+
+## When adding or editing components
+
+- **Modals / overlays**: `background: var(--card); border: 4px solid var(--border);` and use `--card-foreground`, `--muted`, `--muted-foreground` for text and inputs.
+- **Buttons**: Primary = `var(--primary)` + `var(--primary-foreground)`; secondary/cancel = `var(--muted)` + `var(--border)`.
+- **Inputs**: `background: var(--muted); border: 3px solid var(--border); color: var(--card-foreground);` and `border-color: var(--primary)` on focus.
+- **New sections**: Same card style (dark card, thick border, no white or light gray).
+
+Before changing styles in any `.module.css` or global CSS, check that the result still uses these tokens and does not reintroduce light backgrounds or light-theme grays.

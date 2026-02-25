@@ -11,6 +11,7 @@ import styles from './admin.module.css'
 function seedConfigFromChallenges(): AdminConfig {
   const current = getConfig()
   const sorted = [...ALL_CHALLENGES].sort((a, b) => a.order - b.order)
+  const defaults = getDefaultConfig()
   return {
     challengeOrder: sorted.map(c => c.id),
     challengeDurations: sorted.reduce((acc, c) => ({ ...acc, [c.id]: c.duration }), {}),
@@ -20,6 +21,9 @@ function seedConfigFromChallenges(): AdminConfig {
       : {},
     subscriptionMonthlyPriceUsd: typeof current.subscriptionMonthlyPriceUsd === 'number' ? current.subscriptionMonthlyPriceUsd : 4.99,
     supportEmail: typeof current.supportEmail === 'string' && current.supportEmail.trim() ? current.supportEmail.trim() : 'support@example.com',
+    experiencePerLevel: typeof current.experiencePerLevel === 'number' && current.experiencePerLevel >= 1 ? current.experiencePerLevel : defaults.experiencePerLevel,
+    xpPerCustomization: typeof current.xpPerCustomization === 'number' && current.xpPerCustomization >= 0 ? current.xpPerCustomization : defaults.xpPerCustomization,
+    xpPerChallengeMax: typeof current.xpPerChallengeMax === 'number' && current.xpPerChallengeMax >= 0 ? current.xpPerChallengeMax : defaults.xpPerChallengeMax,
   }
 }
 
@@ -86,6 +90,24 @@ export default function AdminPage() {
 
   const setSupportEmail = (value: string) => {
     setConfigState({ ...config, supportEmail: value })
+    setSaved(false)
+  }
+
+  const setExperiencePerLevel = (value: number) => {
+    const n = Math.max(1, Math.round(value))
+    setConfigState({ ...config, experiencePerLevel: n })
+    setSaved(false)
+  }
+
+  const setXpPerCustomization = (value: number) => {
+    const n = Math.max(0, Math.round(value))
+    setConfigState({ ...config, xpPerCustomization: n })
+    setSaved(false)
+  }
+
+  const setXpPerChallengeMax = (value: number) => {
+    const n = Math.max(0, Math.round(value))
+    setConfigState({ ...config, xpPerChallengeMax: n })
     setSaved(false)
   }
 
@@ -205,6 +227,47 @@ export default function AdminPage() {
               className={styles.input}
             />
             <span className={styles.unit}>diamonds</span>
+          </div>
+        </section>
+
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>XP & level progression</h2>
+          <p className={styles.hint}>XP per level: points needed to level up. XP per customization: points per skin/outfit/accessory/face change. Max XP per challenge: awarded by stars (1 star = ⅓ max, 2 = ⅔, 3 = max).</p>
+          <div className={styles.fieldRow}>
+            <label className={styles.label}>XP per level</label>
+            <input
+              type="number"
+              min={1}
+              max={999}
+              value={config.experiencePerLevel}
+              onChange={(e) => setExperiencePerLevel(Number(e.target.value))}
+              className={styles.input}
+            />
+            <span className={styles.unit}>points</span>
+          </div>
+          <div className={styles.fieldRow}>
+            <label className={styles.label}>XP per customization</label>
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={config.xpPerCustomization}
+              onChange={(e) => setXpPerCustomization(Number(e.target.value))}
+              className={styles.input}
+            />
+            <span className={styles.unit}>points</span>
+          </div>
+          <div className={styles.fieldRow}>
+            <label className={styles.label}>Max XP per challenge (by stars)</label>
+            <input
+              type="number"
+              min={0}
+              max={99}
+              value={config.xpPerChallengeMax}
+              onChange={(e) => setXpPerChallengeMax(Number(e.target.value))}
+              className={styles.input}
+            />
+            <span className={styles.unit}>points (1★=⅓, 2★=⅔, 3★=max)</span>
           </div>
         </section>
 

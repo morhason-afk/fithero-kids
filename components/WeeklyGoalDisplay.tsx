@@ -5,7 +5,12 @@ import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
 import WeeklyGoalSettings from './WeeklyGoalSettings'
 import styles from './WeeklyGoalDisplay.module.css'
 
-export default function WeeklyGoalDisplay() {
+interface WeeklyGoalDisplayProps {
+  /** When true (default), show reward card. Set false on main page to match v0 two-card row. */
+  showRewardCard?: boolean
+}
+
+export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalDisplayProps) {
   const { goal, progress } = useWeeklyGoal()
   const [showSettings, setShowSettings] = useState(false)
   
@@ -23,56 +28,39 @@ export default function WeeklyGoalDisplay() {
   return (
     <>
       <div className={styles.goalContainer}>
-        {/* Goal Card */}
+        {/* Goal Card - v0 style */}
         <div className={styles.goalCard}>
           <div className={styles.goalCardBg}></div>
           <div className={styles.goalCardContent}>
             <div className={styles.goalHeader}>
-              <div>
-                <p className={styles.goalLabel}>THIS WEEK'S GOAL</p>
-                <h3 className={styles.goalTitle}>
-                  Complete {goal.starsRequired} Challenges!
-                </h3>
-              </div>
-              <div className={styles.goalHeaderRight}>
-                <button 
-                  className={styles.editButton}
-                  onClick={() => setShowSettings(true)}
-                  aria-label="Edit weekly goal"
-                >
-                  ⚙️
-                </button>
-                <div className={styles.goalIcon}>
-                  <span>🎯</span>
-                </div>
-              </div>
+              <h3 className={styles.goalTitle}>Weekly Goal</h3>
+              <button 
+                className={styles.editButton}
+                onClick={() => setShowSettings(true)}
+                aria-label="Edit goal"
+              >
+                <span className={styles.settingsIcon} aria-hidden>⚙️</span>
+              </button>
             </div>
-            
-            {/* Progress Bar */}
-            <div className={styles.progressSection}>
-              <div className={styles.progressHeader}>
-                <span>Progress</span>
-                <span className={styles.progressCount}>
-                  {progress.starsEarned}/{goal.starsRequired} Complete
-                </span>
-              </div>
-              <div className={styles.progressBar}>
-                <div 
-                  className={styles.progressFill}
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
+            <div className={styles.progressText}>
+              <span className={styles.progressCount}>
+                {progress.starsEarned} / {goal.starsRequired}
+              </span>
+              <span className={styles.starIcon} aria-hidden>⭐</span>
+              <span className={styles.thisWeek}>this week</span>
             </div>
-
-            {/* Days Remaining */}
-            <div className={styles.daysRemaining}>
-              <span className={styles.clockIcon}>⏰</span>
-              <span>{daysRemaining} {daysRemaining === 1 ? 'day' : 'days'} remaining</span>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill}
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
+            <p className={styles.goalTreat}>Goal: {goal.starsRequired} stars for a special treat!</p>
           </div>
         </div>
 
-        {/* Reward Preview Card */}
+        {/* Reward Preview Card - hidden when showRewardCard is false */}
+        {showRewardCard && (
         <div className={styles.rewardCard}>
           <div className={styles.rewardBg}>🏆</div>
           <span className={styles.rewardCrown} aria-hidden>👑</span>
@@ -90,6 +78,7 @@ export default function WeeklyGoalDisplay() {
             </div>
           </div>
         </div>
+        )}
       </div>
 
       {showSettings && (

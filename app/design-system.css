@@ -1,50 +1,144 @@
-/* Design System - Extracted from Canva */
+/* Design System - New dark game theme (from v0 design zip) */
 
 :root {
-  /* Colors */
-  --primary: #6C5CE7;
-  --primary-light: #A29BFE;
-  --secondary: #00CEC9;
-  --accent: #FDCB6E;
-  --success: #00B894;
-  --warning: #F39C12;
-  --error: #E74C3C;
-  --dark: #2D3436;
-  --light: #DFE6E9;
+  --background: #1A1A2E;
+  --foreground: #EAEAEA;
+  --card: #16213E;
+  --card-foreground: #EAEAEA;
+  --primary: #FF6B35;
+  --primary-light: #FF9F1C;
+  --primary-foreground: #FFFFFF;
+  --secondary: #00F5D4;
+  --secondary-foreground: #1A1A2E;
+  --muted: #0F3460;
+  --muted-foreground: #8899AA;
+  --accent: #FFE66D;
+  --accent-foreground: #1A1A2E;
+  --border: #233554;
+  --radius: 1rem;
+  --success: #00E676;
+  --warning: #FF9F1C;
+  --error: #FF2E63;
   --white: #FFFFFF;
-  
-  /* Gradients */
-  --gradient-hero: linear-gradient(135deg, #6C5CE7 0%, #A29BFE 50%, #74B9FF 100%);
+  --dark: #1A1A2E;
+  --game-glow: #FF6B35;
+  --ring: #FF6B35;
+
+  --gradient-hero: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, var(--card) 50%, rgba(0, 245, 212, 0.1) 100%);
   --gradient-gold: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
-  --gradient-energy: linear-gradient(135deg, #00CEC9 0%, #00B894 100%);
+  --gradient-energy: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+}
+
+/* Force dark base so theme is never overridden by other CSS */
+html,
+body {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* Game-style borders */
+.game-border {
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+.game-border-thick {
+  border-width: 4px;
+  border-style: solid;
+  border-color: var(--border);
+}
+
+/* XP / progress bar */
+.xp-bar {
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Game card hover */
+.game-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.game-card:hover:not(:disabled) {
+  transform: translateY(-4px) scale(1.02);
+}
+.game-card:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.99);
+}
+
+/* Primary button (game-btn) */
+.game-btn {
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.3), 0 6px 20px rgba(255, 107, 53, 0.3);
+  transition: all 0.15s ease;
+}
+.game-btn:hover {
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.3), 0 4px 25px rgba(255, 107, 53, 0.5);
+  transform: translateY(2px);
+}
+.game-btn:active {
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3), 0 2px 10px rgba(255, 107, 53, 0.3);
+  transform: translateY(4px);
+}
+
+.game-btn-secondary {
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 245, 212, 0.2);
+  transition: all 0.15s ease;
+}
+.game-btn-secondary:hover {
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.25), 0 4px 25px rgba(0, 245, 212, 0.4);
+  transform: translateY(2px);
+}
+
+/* Noise texture overlay */
+.noise-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(108, 92, 231, 0.4); }
-  50% { box-shadow: 0 0 40px rgba(108, 92, 231, 0.8); }
-}
-
-@keyframes star-spin {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.4); }
+  50% { box-shadow: 0 0 24px 6px rgba(255, 107, 53, 0.25); }
 }
 
 @keyframes bounce-in {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.2); }
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
   100% { transform: scale(1); opacity: 1; }
 }
 
-@keyframes coin-flip {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(360deg); }
+@keyframes energy-pulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(2); }
+}
+
+@keyframes hero-idle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(-1deg); }
+  75% { transform: translateY(-3px) rotate(1deg); }
+}
+
+@keyframes count-up {
+  0% { transform: translateY(10px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-30deg); }
+  60% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 @keyframes shimmer {
@@ -52,45 +146,10 @@
   100% { background-position: 200% 0; }
 }
 
-@keyframes fruit-fall {
-  0% { transform: translateY(-100%) rotate(0deg); }
-  100% { transform: translateY(100%) rotate(360deg); }
-}
-
-@keyframes punch-impact {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-  100% { transform: scale(2); opacity: 0; }
-}
-
-/* Utility Classes */
-.float-animation { animation: float 3s ease-in-out infinite; }
-.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
-.star-spin { animation: star-spin 2s ease-in-out infinite; }
-.bounce-in { animation: bounce-in 0.5s ease-out forwards; }
-.coin-flip { animation: coin-flip 1s ease-in-out; }
-
-.shimmer-effect {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-.card-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.3s ease;
-}
-
-.card-3d:hover {
-  transform: translateY(-8px) rotateX(5deg);
-}
-
-.glass-effect {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.neo-shadow {
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.5);
-}
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-bounce-in { animation: bounce-in 0.6s ease-out forwards; }
+.animate-energy-pulse { animation: energy-pulse 2s ease-out infinite; }
+.animate-hero-idle { animation: hero-idle 4s ease-in-out infinite; }
+.animate-count-up { animation: count-up 0.5s ease-out forwards; }
+.animate-star-pop { animation: star-pop 0.4s ease-out forwards; }

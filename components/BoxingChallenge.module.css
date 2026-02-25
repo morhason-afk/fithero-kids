@@ -137,16 +137,21 @@
 }
 
 .button:hover,
-.startButton:hover,
 .stopButton:hover,
 .cancelButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
+.startButton:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.25), 0 4px 25px rgba(0, 245, 212, 0.4);
+}
+
 .startButton {
-  background: #4caf50;
-  color: white;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  box-shadow: 0 4px 0 0 rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 245, 212, 0.2);
 }
 
 .stopButton {

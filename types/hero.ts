@@ -12,6 +12,7 @@ export interface CharacterBuild {
   skinId: string
   outfitId: string
   accessoryIds: string[] // character accessories (cape, crown, etc.)
+  expressionId?: string // face expression (happy, sad, surprised, stars, etc.)
 }
 
 export interface HeroCosmetics {
@@ -20,7 +21,8 @@ export interface HeroCosmetics {
   /** Legacy hero accessories (emoji). Kept for migration. */
   accessories?: string[]
   characterBuild: CharacterBuild
-  iconCustomization: {
+  /** @deprecated Face customization removed. Kept for migration. */
+  iconCustomization?: {
     eyes: string
     mouth: string
     accessory: string

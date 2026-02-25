@@ -1,6 +1,7 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import SubscriptionModal from '@/components/SubscriptionModal'
 
 export const SUBSCRIPTION_STORAGE_KEY = 'exercise-game-subscription'
@@ -30,16 +31,18 @@ export function SubscriptionProvider({ children }: { children: ReactNode }) {
     setModalReason(reason)
   }
 
+  const modalEl = modalReason ? (
+    <SubscriptionModal
+      reason={modalReason}
+      onClose={() => setModalReason(null)}
+      onSuccess={() => setHasSubscription(true)}
+    />
+  ) : null
+
   return (
     <SubscriptionContext.Provider value={{ hasSubscription, setHasSubscription, showSubscriptionMessage }}>
       {children}
-      {modalReason && (
-        <SubscriptionModal
-          reason={modalReason}
-          onClose={() => setModalReason(null)}
-          onSuccess={() => setHasSubscription(true)}
-        />
-      )}
+      {typeof document !== 'undefined' && createPortal(modalEl, document.body)}
     </SubscriptionContext.Provider>
   )
 }

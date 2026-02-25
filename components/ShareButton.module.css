@@ -5,21 +5,23 @@
   justify-content: center;
   gap: 8px;
   padding: 10px 18px;
-  background: #ffffff;
-  color: #6B7280;
-  border: 2px solid #E5E7EB;
+  background: var(--muted);
+  color: var(--card-foreground);
+  border: 3px solid var(--border);
   border-radius: 12px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s, border-color 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s, border-color 0.2s, background 0.2s;
   min-height: 44px;
 }
 
 .shareButton:hover {
   transform: translateY(-1px);
-  border-color: #D1D5DB;
+  background: var(--border);
+  border-color: var(--primary);
+  color: var(--foreground);
 }
 
 .shareButton:active {

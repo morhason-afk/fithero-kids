@@ -1,7 +1,7 @@
 .balanceBar {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .diamonds,
@@ -9,31 +9,33 @@
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.diamonds {
-  color: #0EA5E9;
-}
-
-.diamonds .label {
-  color: #1F2937;
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 3px solid var(--border);
+  background: rgba(255, 107, 53, 0.1);
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--primary);
 }
 
 .stars {
-  color: #1F2937;
+  background: var(--muted);
+  color: var(--card-foreground);
+  border-color: var(--accent);
 }
 
-.stars .icon {
-  color: #FBBF24;
+.diamonds .label,
+.stars .label {
+  display: none;
 }
 
 .icon {
-  font-size: 1.125rem;
+  font-size: 1rem;
   line-height: 1;
 }
 
 .amount {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 700;
   font-family: 'Fredoka', sans-serif;
   color: inherit;

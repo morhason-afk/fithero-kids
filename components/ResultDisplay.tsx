@@ -5,7 +5,9 @@ import { Challenge, ExerciseResult } from '@/types/challenge'
 import { useHero } from '@/contexts/HeroContext'
 import { useGame } from '@/contexts/GameContext'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
-import { getStarEmoji, getResultTitle, shouldCelebrate } from '@/utils/scoring'
+import { useConfig } from '@/contexts/ConfigContext'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { getStarEmoji, getResultTitle, shouldCelebrate, getXpFromChallengeStars } from '@/utils/scoring'
 import styles from './ResultDisplay.module.css'
 
 interface ResultDisplayProps {
@@ -15,17 +17,21 @@ interface ResultDisplayProps {
 }
 
 export default function ResultDisplay({ result, challenge, onClose }: ResultDisplayProps) {
-  const { addCoins } = useHero()
+  const { addCoins, addXp } = useHero()
   const { updateProgress } = useGame()
   const { addStars } = useWeeklyGoal()
+  const { config } = useConfig()
+  const { t } = useLanguage()
   const [coinsAnimated, setCoinsAnimated] = useState(false)
   const [displayCoins, setDisplayCoins] = useState(0)
   const [coinsAdded, setCoinsAdded] = useState(false)
 
   useEffect(() => {
-    // Add coins to hero, update progress, and add to weekly goal (only once)
+    // Add coins, XP (from stars), update progress, and add to weekly goal (only once)
     if (!coinsAdded) {
       addCoins(result.coins)
+      const challengeXp = getXpFromChallengeStars(result.stars, config.xpPerChallengeMax ?? 15)
+      if (challengeXp > 0) addXp(challengeXp)
       updateProgress(challenge.id, result.stars)
       addStars(result.stars)
       setCoinsAdded(true)
@@ -68,7 +74,8 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
     return '💪'
   }
 
-  const title = getResultTitle(result.stars)
+  const titleKey = result.stars >= 3 ? 'Amazing!' : result.stars === 2 ? 'Great job!' : 'Try again'
+  const title = t(titleKey)
   const celebrate = shouldCelebrate(result.stars)
 
   return (
@@ -105,29 +112,29 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
           <div className={styles.rewardCard}>
             <span className={styles.rewardIcon}>💎</span>
             <p className={styles.rewardAmount}>+{displayCoins}</p>
-            <p className={styles.rewardLabel}>Diamonds</p>
+            <p className={styles.rewardLabel}>{t('Diamonds')}</p>
           </div>
           <div className={styles.rewardCard}>
             <span className={styles.rewardIcon}>⭐</span>
             <p className={styles.rewardAmount}>+{result.stars}</p>
-            <p className={styles.rewardLabel}>Stars</p>
+            <p className={styles.rewardLabel}>{t('Stars')}</p>
           </div>
         </div>
 
         {/* New Record Badge - only for 3 stars */}
         {result.stars === 3 && (
           <div className={styles.recordBadge}>
-            🏆 NEW PERSONAL BEST!
+            🏆 {t('NEW PERSONAL BEST!')}
           </div>
         )}
 
         {/* Actions */}
         <div className={styles.actions}>
           <button className={styles.homeButton} onClick={onClose}>
-            Home
+            {t('Home')}
           </button>
           <button className={styles.playAgainButton} onClick={onClose}>
-            {result.stars >= 2 ? 'Play Again!' : 'Try Again'}
+            {result.stars >= 2 ? t('Play Again!') : t('Try Again')}
           </button>
         </div>
       </div>

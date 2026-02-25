@@ -39,3 +39,9 @@ export function getResultTitle(stars: number): string {
 export function shouldCelebrate(stars: number): boolean {
   return stars >= 2
 }
+
+/** XP from challenge completion: 0 stars → 0, 1 → ⅓ max, 2 → ⅔ max, 3 → max. */
+export function getXpFromChallengeStars(stars: number, xpPerChallengeMax: number): number {
+  if (stars <= 0) return 0
+  return Math.round((stars / 3) * Math.max(0, xpPerChallengeMax))
+}

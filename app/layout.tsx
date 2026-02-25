@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import './globals.css'
 import './design-system.css'
+import './globals.css'
 
 export const metadata: Metadata = {
   title: 'FitHero Kids - Exercise Game',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
-  themeColor: '#6C5CE7',
+  themeColor: '#1A1A2E',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark-theme">
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="/manifest.json" />
@@ -36,7 +36,11 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body>{children}</body>
+      <body>
+        <div id="__app" className="app-root">
+          {children}
+        </div>
+      </body>
     </html>
   )
 }
