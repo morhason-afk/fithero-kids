@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Challenge } from '@/types/challenge'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { playSound } from '@/utils/sounds'
 import styles from './CameraRecorder.module.css'
 
@@ -12,6 +13,7 @@ interface CameraRecorderProps {
 }
 
 export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }: CameraRecorderProps) {
+  const { t } = useLanguage()
   const [isRecording, setIsRecording] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(challenge.duration)
   const [cameraStatus, setCameraStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -279,8 +281,8 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
   if (cameraStatus === 'loading') {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Requesting camera access...</div>
-        <div className={styles.loadingSubtext}>Please allow camera access when prompted</div>
+        <div className={styles.loading}>{t('Requesting camera access...')}</div>
+        <div className={styles.loadingSubtext}>{t('Please allow camera access when prompted')}</div>
         {/* Video element must exist so ref is set when stream arrives */}
         <video ref={videoRef} autoPlay playsInline muted className={styles.videoHidden} />
       </div>
@@ -346,7 +348,7 @@ export default function CameraRecorder({ challenge, onVideoRecorded, onCancel }:
             ▶️ Start Recording
           </button>
         ) : (
-          <p className={styles.recordingHint}>Recording… Complete the challenge to finish.</p>
+          <p className={styles.recordingHint}>{t('Recording… Complete the challenge to finish.')}</p>
         )}
       </div>
 

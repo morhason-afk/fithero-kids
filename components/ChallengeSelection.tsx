@@ -67,10 +67,12 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
           const showLock = !unlocked || subscriptionLocked
           const { min: rewardMin, max: rewardMax } = getRewardRange(challenge)
           const prevChallenge = sortedChallenges[index - 1]
+          const minStars = getMinStarsToUnlock(challenge)
+          const prevTitle = prevChallenge?.title ?? t('previous challenge')
           const lockReason = !unlocked
-            ? `Need ${getMinStarsToUnlock(challenge)} star${getMinStarsToUnlock(challenge) !== 1 ? 's' : ''} on ${prevChallenge?.title ?? 'previous challenge'}`
+            ? `${t('Need')} ${minStars} ${minStars === 1 ? t('star') : t('stars')} ${t('on')} ${prevTitle}`
             : subscriptionLocked
-              ? 'Subscribe to unlock'
+              ? t('Subscribe to unlock')
               : ''
 
           return (
@@ -89,16 +91,16 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
                   <div className={styles.lockText}>{lockReason}</div>
                   {subscriptionLocked && (
                     <button type="button" className={styles.unlockButton} onClick={(e) => { e.stopPropagation(); showSubscriptionMessage('challenges'); }}>
-                      UNLOCK NOW
+                      {t('UNLOCK NOW')}
                     </button>
                   )}
                 </div>
               )}
               {!progress && unlocked && !subscriptionLocked && index !== 3 && (
-                <div className={styles.tagNew}>New</div>
+                <div className={styles.tagNew}>{t('New')}</div>
               )}
               {unlocked && !subscriptionLocked && isPopular(index) && (
-                <div className={styles.tagPopular}>Popular</div>
+                <div className={styles.tagPopular}>{t('Popular')}</div>
               )}
 
               <div className={styles.cardRow}>
@@ -106,10 +108,10 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
                   {showLock ? <span className={styles.lockEmoji} aria-hidden>🔒</span> : <span className={styles.icon}>{challenge.icon}</span>}
                 </div>
                 <div className={styles.cardContent}>
-                  <h3 className={styles.challengeTitle}>{challenge.title}</h3>
-                  <p className={styles.challengeDesc}>{challenge.description}</p>
+                  <h3 className={styles.challengeTitle}>{t(challenge.title)}</h3>
+                  <p className={styles.challengeDesc}>{t(challenge.description)}</p>
                   <div className={styles.cardMeta}>
-                    <span className={styles.duration}>{challenge.duration} sec</span>
+                    <span className={styles.duration}>{challenge.duration} {t('sec')}</span>
                     {!showLock && (
                       <span className={styles.rewardRange}>
                         <span className={styles.diamond} aria-hidden>💎</span>

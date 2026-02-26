@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import styles from './WeeklyGoalSettings.module.css'
 
 interface WeeklyGoalSettingsProps {
@@ -10,6 +11,7 @@ interface WeeklyGoalSettingsProps {
 
 export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps) {
   const { goal, updateGoal } = useWeeklyGoal()
+  const { t } = useLanguage()
   const [starsRequired, setStarsRequired] = useState(goal.starsRequired)
   const [giftDescription, setGiftDescription] = useState(goal.giftDescription)
   const [notificationMethod, setNotificationMethod] = useState(goal.notificationMethod)
@@ -32,10 +34,10 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose} role="button" tabIndex={-1} aria-label="Close">
+    <div className={styles.overlay} onClick={onClose} role="button" tabIndex={-1} aria-label={t('Close')}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>⚙️ Configure Weekly Goal</h2>
+          <h2>{t('⚙️ Configure Weekly Goal')}</h2>
           <button className={styles.closeButton} onClick={onClose}>
             ✕
           </button>
@@ -43,7 +45,7 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
 
         <div className={styles.content}>
           <div className={styles.field}>
-            <label>Stars Required This Week</label>
+            <label>{t('Stars Required This Week')}</label>
             <input
               type="number"
               min="1"
@@ -55,7 +57,7 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
           </div>
 
           <div className={styles.field}>
-            <label>Gift Description</label>
+            <label>{t('Gift Description')}</label>
             <input
               type="text"
               value={giftDescription}
@@ -66,23 +68,23 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
           </div>
 
           <div className={styles.field}>
-            <label>Notification Method</label>
+            <label>{t('Notification Method')}</label>
             <select
               value={notificationMethod}
               onChange={(e) => setNotificationMethod(e.target.value as any)}
               className={styles.select}
             >
-              <option value="message">In-App Message</option>
-              <option value="email">Email</option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="push">Browser Push Notification</option>
+              <option value="message">{t('In-App Message')}</option>
+              <option value="email">{t('Email')}</option>
+              <option value="whatsapp">{t('WhatsApp')}</option>
+              <option value="push">{t('Browser Push Notification')}</option>
             </select>
           </div>
 
           {(notificationMethod === 'email' || notificationMethod === 'whatsapp') && (
             <div className={styles.field}>
               <label>
-                {notificationMethod === 'email' ? 'Email Address' : 'WhatsApp Number'}
+                {notificationMethod === 'email' ? t('Email Address') : t('WhatsApp Number')}
               </label>
               <input
                 type={notificationMethod === 'email' ? 'email' : 'tel'}
@@ -100,10 +102,10 @@ export default function WeeklyGoalSettings({ onClose }: WeeklyGoalSettingsProps)
 
           <div className={styles.actions}>
             <button className={styles.cancelButton} onClick={onClose}>
-              Cancel
+              {t('Cancel')}
             </button>
             <button className={styles.saveButton} onClick={handleSave}>
-              Save Settings
+              {t('Save Settings')}
             </button>
           </div>
         </div>

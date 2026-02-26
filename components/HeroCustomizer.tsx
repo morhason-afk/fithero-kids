@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { useHero } from '@/contexts/HeroContext'
 import { useConfig } from '@/contexts/ConfigContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useSubscription } from '@/contexts/SubscriptionContext'
 import { trackEvent } from '@/utils/analytics'
 import {
@@ -31,6 +32,7 @@ interface HeroCustomizerProps {
 export default function HeroCustomizer({ isOpen, onClose, initialSection = 'character' }: HeroCustomizerProps) {
   const { hero, updateCosmetics, addXp, spendCoins, addOwnedItem, isItemOwned } = useHero()
   const { config } = useConfig()
+  const { t } = useLanguage()
   const { hasSubscription, showSubscriptionMessage } = useSubscription()
   const xpPerCustomization = typeof config.xpPerCustomization === 'number' && config.xpPerCustomization >= 0 ? config.xpPerCustomization : 1
   const [activeTab, setActiveTab] = useState<CustomizerSection>(initialSection)
@@ -164,7 +166,7 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
       <div className={styles.overlay} onClick={onClose} aria-label="Close"></div>
       <div className={styles.customizer} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
-          <h2>🎨 Customize Your Hero</h2>
+          <h2>{t('🎨 Customize Your Hero')}</h2>
           <div className={styles.coinBalance}>
             <span className={styles.coinIcon}>💎</span>
             <span className={styles.coinAmount}>{hero.stats.totalCoins}</span>
@@ -179,13 +181,13 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
         </div>
 
         <p className={styles.subscriptionHint}>
-          First 5 in each category (skin, outfit, accessories) free or for diamonds • Rest require subscription
+          {t('First 5 in each category (skin, outfit, accessories) free or for diamonds • Rest require subscription')}
         </p>
 
         <div className={styles.options}>
           <>
           <div className={styles.optionGroup}>
-            <label>Skin</label>
+            <label>{t('Skin')}</label>
                 <div className={styles.colorGrid}>
                   {SKIN_OPTIONS.map((skin, idx) => {
                     const subLocked = heroRequiresSubscription(idx) && !hasSubscription
@@ -205,7 +207,7 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
                 </div>
               </div>
               <div className={styles.optionGroup}>
-                <label>Outfit</label>
+                <label>{t('Outfit')}</label>
                 <div className={styles.outfitGrid}>
                   {OUTFIT_OPTIONS.map((outfit, idx) => {
                     const subLocked = heroRequiresSubscription(idx) && !hasSubscription
@@ -218,14 +220,14 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
                       >
                         <div className={styles.outfitPreview} style={{ background: `linear-gradient(180deg, ${outfit.bodyColor} 50%, ${outfit.legColor} 50%)` }} />
                         <span className={styles.heroName}>{outfit.name}</span>
-                        {subLocked ? <span className={styles.subscribeText}>Subscribe</span> : !isItemOwned(outfit.id) && outfit.cost > 0 && <span className={styles.costText}>{outfit.cost}💎</span>}
+                        {subLocked ? <span className={styles.subscribeText}>{t('Subscribe')}</span> : !isItemOwned(outfit.id) && outfit.cost > 0 && <span className={styles.costText}>{outfit.cost}💎</span>}
                       </button>
                     )
                   })}
                 </div>
               </div>
               <div className={styles.optionGroup}>
-                <label>Accessories</label>
+                <label>{t('Accessories')}</label>
                 <div className={styles.accessoryGrid}>
                   {CHARACTER_ACCESSORIES.map((acc, idx) => {
                     const subLocked = heroRequiresSubscription(idx) && !hasSubscription
@@ -236,18 +238,18 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
                         className={`${styles.accessoryButton} ${active ? styles.active : ''} ${subLocked ? styles.subscriptionLocked : ''} ${!subLocked && !canAfford(acc.cost, acc.id) && acc.cost > 0 ? styles.disabled : ''}`}
                         onClick={() => handleCharacterAccessoryToggle(acc, idx)}
                         disabled={!subLocked && !canAfford(acc.cost, acc.id) && acc.cost > 0}
-                        title={subLocked ? 'Subscribe' : acc.name}
+                        title={subLocked ? t('Subscribe') : acc.name}
                       >
                         <span className={styles.accessoryIcon}>{acc.type === 'crown' ? '👑' : acc.type === 'cape' ? '🦸' : acc.type === 'belt' ? '⛑️' : acc.type === 'gloves' ? '🥊' : acc.type === 'wings' ? '🪽' : acc.type === 'scarf' ? '🧣' : acc.type === 'shield' ? '🛡️' : acc.type === 'halo' ? '😇' : acc.type === 'mask' ? '🎭' : acc.type === 'backpack' ? '🎒' : '—'}</span>
                         <span className={styles.accessoryName}>{acc.name}</span>
-                        {subLocked ? <span className={styles.subscribeText}>Subscribe</span> : isItemOwned(acc.id) ? <span className={styles.ownedText}>Owned</span> : acc.cost > 0 ? <span className={styles.costText}>{acc.cost}💎</span> : null}
+                        {subLocked ? <span className={styles.subscribeText}>{t('Subscribe')}</span> : isItemOwned(acc.id) ? <span className={styles.ownedText}>{t('Owned')}</span> : acc.cost > 0 ? <span className={styles.costText}>{acc.cost}💎</span> : null}
                       </button>
                     )
                   })}
                 </div>
               </div>
               <div className={styles.optionGroup}>
-                <label>Face</label>
+                <label>{t('Face')}</label>
                 <div className={styles.outfitGrid}>
                   {FACE_EXPRESSIONS.map((expr, idx) => {
                     const subLocked = heroRequiresSubscription(idx) && !hasSubscription
@@ -264,7 +266,7 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
                           <span className={styles.faceEmoji} aria-hidden>{faceEmoji}</span>
                         </div>
                         <span className={styles.heroName}>{expr.name}</span>
-                        {subLocked ? <span className={styles.subscribeText}>Subscribe</span> : !isItemOwned(expr.id) && expr.cost > 0 && <span className={styles.costText}>{expr.cost}💎</span>}
+                        {subLocked ? <span className={styles.subscribeText}>{t('Subscribe')}</span> : !isItemOwned(expr.id) && expr.cost > 0 && <span className={styles.costText}>{expr.cost}💎</span>}
                       </button>
                     )
                   })}

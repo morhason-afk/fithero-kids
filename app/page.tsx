@@ -95,16 +95,18 @@ function HomeContent() {
                   className={styles.langBtn + (language === 'en' ? ' ' + styles.langBtnActive : '')}
                   onClick={() => setLanguage('en')}
                   aria-pressed={language === 'en'}
+                  title="English"
                 >
-                  EN
+                  🇺🇸
                 </button>
                 <button
                   type="button"
                   className={styles.langBtn + (language === 'he' ? ' ' + styles.langBtnActive : '')}
                   onClick={() => setLanguage('he')}
                   aria-pressed={language === 'he'}
+                  title="עברית"
                 >
-                  ע
+                  🇮🇱
                 </button>
               </div>
               <BalanceBar />

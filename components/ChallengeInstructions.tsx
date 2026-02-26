@@ -1,6 +1,7 @@
 'use client'
 
 import { Challenge } from '@/types/challenge'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { EXERCISE_INSTRUCTIONS } from '@/data/exerciseInstructions'
 import styles from './ChallengeInstructions.module.css'
 
@@ -11,6 +12,7 @@ interface ChallengeInstructionsProps {
 }
 
 export default function ChallengeInstructions({ challenge, onContinue, onBack }: ChallengeInstructionsProps) {
+  const { t } = useLanguage()
   const instruction = EXERCISE_INSTRUCTIONS[challenge.exerciseType] || {
     title: challenge.title,
     steps: ['Follow the exercise instructions', 'Do your best!'],
@@ -21,7 +23,7 @@ export default function ChallengeInstructions({ challenge, onContinue, onBack }:
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h3 className={styles.title}>How to Play</h3>
+        <h3 className={styles.title}>{t('How to Play')}</h3>
       </div>
 
       <div className={styles.stepsContainer}>
@@ -29,9 +31,9 @@ export default function ChallengeInstructions({ challenge, onContinue, onBack }:
           <div key={index} className={styles.step}>
             <div className={styles.stepNumber}>{index + 1}</div>
             <div className={styles.stepContent}>
-              <h4 className={styles.stepTitle}>{step.split(':')[0] || step}</h4>
+              <h4 className={styles.stepTitle}>{t(step.split(':')[0] || step)}</h4>
               {step.includes(':') && (
-                <p className={styles.stepDescription}>{step.split(':')[1]}</p>
+                <p className={styles.stepDescription}>{t(step.split(':')[1])}</p>
               )}
             </div>
           </div>
@@ -42,12 +44,12 @@ export default function ChallengeInstructions({ challenge, onContinue, onBack }:
         <div className={styles.demoIcon}>
           {instruction.emoji}
         </div>
-        <p className={styles.demoText}>Demo animation plays here</p>
+        <p className={styles.demoText}>{t('Demo animation plays here')}</p>
       </div>
 
       <div className={styles.actions}>
         <button className={styles.continueButton} onClick={onContinue}>
-          Got it! Let's Go! 👍
+          {t('Got it! Let\'s Go!')} 👍
         </button>
       </div>
     </div>

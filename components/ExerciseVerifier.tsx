@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Challenge, ExerciseResult } from '@/types/challenge'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { calculateStars, calculateCoinsFromStars } from '@/utils/scoring'
 import styles from './ExerciseVerifier.module.css'
 
@@ -12,6 +13,7 @@ interface ExerciseVerifierProps {
 }
 
 export default function ExerciseVerifier({ challenge, videoBlob, onVerificationComplete }: ExerciseVerifierProps) {
+  const { t } = useLanguage()
   const [progress, setProgress] = useState(0)
   const [status, setStatus] = useState('Analyzing your exercise...')
 
@@ -167,7 +169,7 @@ export default function ExerciseVerifier({ challenge, videoBlob, onVerificationC
         </div>
       </div>
       
-      <h3 className={styles.title}>Checking your moves...</h3>
+      <h3 className={styles.title}>{t('Checking your moves...')}</h3>
       <p className={styles.status}>{status}</p>
       
       <div className={styles.progressContainer}>

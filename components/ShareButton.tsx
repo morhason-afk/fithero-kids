@@ -3,6 +3,7 @@
 import { useRef, useCallback, useState } from 'react'
 import { toPng } from 'html-to-image'
 import { useHero } from '@/contexts/HeroContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { getOutfitById, DEFAULT_OUTFIT_ID } from '@/data/characterOptions'
 import styles from './ShareButton.module.css'
 
@@ -19,6 +20,7 @@ interface ShareButtonProps {
 
 export default function ShareButton({ shareContainerRef }: ShareButtonProps) {
   const { hero } = useHero()
+  const { t } = useLanguage()
   const outfitId = hero.cosmetics.characterBuild?.outfitId || DEFAULT_OUTFIT_ID
   const outfit = getOutfitById(outfitId)
   const outfitName = outfit?.name ?? 'My Hero'
@@ -81,10 +83,10 @@ export default function ShareButton({ shareContainerRef }: ShareButtonProps) {
       className={styles.shareButton}
       onClick={handleShare}
       disabled={sharing}
-      aria-label="Share my character image and message on WhatsApp"
+      aria-label={t('Share my character image and message on WhatsApp')}
     >
       <span className={styles.icon}>📤</span>
-      <span className={styles.label}>{sharing ? 'Preparing…' : 'Share'}</span>
+      <span className={styles.label}>{sharing ? t('Preparing…') : t('Share')}</span>
     </button>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 import WeeklyGoalSettings from './WeeklyGoalSettings'
 import styles from './WeeklyGoalDisplay.module.css'
 
@@ -12,6 +13,7 @@ interface WeeklyGoalDisplayProps {
 
 export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalDisplayProps) {
   const { goal, progress } = useWeeklyGoal()
+  const { t } = useLanguage()
   const [showSettings, setShowSettings] = useState(false)
   
   const progressPercent = Math.min(100, (progress.starsEarned / goal.starsRequired) * 100)
@@ -33,11 +35,11 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
           <div className={styles.goalCardBg}></div>
           <div className={styles.goalCardContent}>
             <div className={styles.goalHeader}>
-              <h3 className={styles.goalTitle}>Weekly Goal</h3>
+              <h3 className={styles.goalTitle}>{t('Weekly Goal')}</h3>
               <button 
                 className={styles.editButton}
                 onClick={() => setShowSettings(true)}
-                aria-label="Edit goal"
+                aria-label={t('Edit goal')}
               >
                 <span className={styles.settingsIcon} aria-hidden>⚙️</span>
               </button>
@@ -47,7 +49,7 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
                 {progress.starsEarned} / {goal.starsRequired}
               </span>
               <span className={styles.starIcon} aria-hidden>⭐</span>
-              <span className={styles.thisWeek}>this week</span>
+              <span className={styles.thisWeek}>{t('this week')}</span>
             </div>
             <div className={styles.progressBar}>
               <div 
@@ -55,7 +57,7 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <p className={styles.goalTreat}>Goal: {goal.starsRequired} stars for a special treat!</p>
+            <p className={styles.goalTreat}>{t('Goal: {starsRequired} stars for a special treat!').replace('{starsRequired}', String(goal.starsRequired))}</p>
           </div>
         </div>
 
@@ -65,15 +67,15 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
           <div className={styles.rewardBg}>🏆</div>
           <span className={styles.rewardCrown} aria-hidden>👑</span>
           <div className={styles.rewardContent}>
-            <p className={styles.rewardLabel}>WEEKLY REWARD</p>
+            <p className={styles.rewardLabel}>{t('WEEKLY REWARD')}</p>
             <h3 className={styles.rewardTitle}>{goal.giftDescription}!</h3>
             <div className={styles.rewardPreview}>
               <div className={styles.rewardIcon}>
                 <span>👑</span>
               </div>
               <div className={styles.rewardStats}>
-                <p className={styles.rewardValue}>+500 Diamonds</p>
-                <p className={styles.rewardValue}>+50 Stars</p>
+                <p className={styles.rewardValue}>{t('+500 Diamonds')}</p>
+                <p className={styles.rewardValue}>{t('+50 Stars')}</p>
               </div>
             </div>
           </div>

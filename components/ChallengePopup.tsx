@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Challenge, ExerciseResult } from '@/types/challenge'
+import { useLanguage } from '@/contexts/LanguageContext'
 import ChallengeInstructions from './ChallengeInstructions'
 import CameraRecorder from './CameraRecorder'
 import ExerciseVerifier from './ExerciseVerifier'
@@ -20,6 +21,7 @@ interface ChallengePopupProps {
 type PopupState = 'challenge' | 'instructions' | 'camera' | 'recording' | 'verifying' | 'result'
 
 export default function ChallengePopup({ challenge, onComplete }: ChallengePopupProps) {
+  const { t } = useLanguage()
   const [state, setState] = useState<PopupState>('challenge')
   const [videoBlob, setVideoBlob] = useState<Blob | null>(null)
   const [result, setResult] = useState<ExerciseResult | null>(null)
@@ -139,32 +141,32 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
                 ✕
               </button>
               <span className={styles.icon}>{challenge.icon}</span>
-              <h2 className={styles.challengeTitle}>{challenge.title}</h2>
-              <p className={styles.challengeDescription}>{challenge.description}</p>
+              <h2 className={styles.challengeTitle}>{t(challenge.title)}</h2>
+              <p className={styles.challengeDescription}>{t(challenge.description)}</p>
             </div>
             <div className={styles.challengeInfo}>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>⏱️ Duration</span>
-                <span className={styles.infoValue}>{challenge.duration} seconds</span>
+                <span className={styles.infoLabel}>⏱️ {t('Duration')}</span>
+                <span className={styles.infoValue}>{challenge.duration}{t(' seconds')}</span>
               </div>
               <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>🎯 Goal</span>
+                <span className={styles.infoLabel}>🎯 {t('Goal')}</span>
                 <span className={styles.infoValue}>
                   {challenge.exerciseType === 'boxing'
-                    ? 'Hit at least 50% of targets with punches'
+                    ? t('Hit at least 50% of targets with punches')
                     : challenge.exerciseType === 'fruit-ninja'
-                      ? 'Slice at least 50% of fruits with your hands'
-                      : 'Complete challenge'}
+                      ? t('Slice at least 50% of fruits with your hands')
+                      : t('Complete challenge')}
                 </span>
               </div>
               <div className={styles.infoItem} style={{ background: '#FEF3C7' }}>
-                <span className={styles.infoLabel} style={{ color: '#D97706' }}>💎 Reward</span>
-                <span className={styles.infoValue} style={{ color: '#D97706' }}>20-60 diamonds</span>
+                <span className={styles.infoLabel} style={{ color: '#D97706' }}>💎 {t('Reward')}</span>
+                <span className={styles.infoValue} style={{ color: '#D97706' }}>{t('20-60 diamonds')}</span>
               </div>
             </div>
             <div className={styles.startButtonWrap}>
               <button className={styles.startButton} onClick={handleShowInstructions}>
-                🎮 Start Challenge!
+                🎮 {t('Start Challenge!')}
               </button>
             </div>
           </div>

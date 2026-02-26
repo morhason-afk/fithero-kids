@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useLanguage } from '@/contexts/LanguageContext'
 import styles from './HeroNameEditor.module.css'
 
 const STORAGE_KEY = 'fithero-hero-name'
@@ -35,6 +36,7 @@ interface HeroNameEditorProps {
 }
 
 export default function HeroNameEditor({ isOpen, onClose, currentName, onSave }: HeroNameEditorProps) {
+  const { t } = useLanguage()
   const [value, setValue] = useState(currentName)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -60,11 +62,11 @@ export default function HeroNameEditor({ isOpen, onClose, currentName, onSave }:
     setError(null)
     const trimmed = value.trim()
     if (!trimmed) {
-      setError('Please enter a name.')
+      setError(t('Please enter a name.'))
       return
     }
     if (trimmed.length > MAX_LENGTH) {
-      setError(`Name must be ${MAX_LENGTH} characters or less.`)
+      setError(t('Name must be {MAX_LENGTH} characters or less.').replace('{MAX_LENGTH}', String(MAX_LENGTH)))
       return
     }
     const saved = setStoredHeroName(trimmed)
@@ -83,15 +85,15 @@ export default function HeroNameEditor({ isOpen, onClose, currentName, onSave }:
             type="button"
             className={styles.closeButton}
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t('Close')}
           >
             ✕
           </button>
-          <h2 className={styles.title}>Name your hero</h2>
-          <p className={styles.subtitle}>Choose a name that appears below your character.</p>
+          <h2 className={styles.title}>{t('Name your hero')}</h2>
+          <p className={styles.subtitle}>{t('Choose a name that appears below your character.')}</p>
           <form onSubmit={handleSubmit} className={styles.form}>
             <div className={styles.field}>
-              <label htmlFor="hero-name-input">Hero name</label>
+              <label htmlFor="hero-name-input">{t('Hero name')}</label>
               <input
                 id="hero-name-input"
                 type="text"
@@ -109,10 +111,10 @@ export default function HeroNameEditor({ isOpen, onClose, currentName, onSave }:
             </div>
             <div className={styles.actions}>
               <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                Cancel
+                {t('Cancel')}
               </button>
               <button type="submit" className={styles.saveBtn} disabled={!value.trim()}>
-                Save
+                {t('Save')}
               </button>
             </div>
           </form>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Challenge } from '@/types/challenge'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { initializePoseDetector, detectPose, getHandPositions, checkCollision } from '@/utils/poseDetection'
 import { playSound } from '@/utils/sounds'
 import styles from './FruitNinjaChallenge.module.css'
@@ -28,6 +29,7 @@ const SPAWN_INTERVAL = 800 // milliseconds
 const FALL_SPEED = 3 // pixels per frame
 
 export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }: FruitNinjaChallengeProps) {
+  const { t } = useLanguage()
   const [isActive, setIsActive] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(challenge.duration)
   const [score, setScore] = useState(0)
@@ -384,7 +386,7 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
       <div className={styles.container}>
         <div className={styles.error}>
           <p>{error || 'Camera access denied'}</p>
-          <button className={styles.button} onClick={initializeCamera}>Try Again</button>
+          <button className={styles.button} onClick={initializeCamera}>{t('Try Again')}</button>
         </div>
       </div>
     )
@@ -400,7 +402,7 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
         style={{ touchAction: 'none', cursor: isActive ? 'crosshair' : 'default' }}
       >
         {cameraStatus === 'loading' && (
-          <div className={styles.loadingOverlay}>Loading camera...</div>
+          <div className={styles.loadingOverlay}>{t('Loading camera...')}</div>
         )}
         <video ref={videoRef} autoPlay playsInline muted className={styles.video} />
         <canvas
@@ -421,10 +423,10 @@ export default function FruitNinjaChallenge({ challenge, onComplete, onCancel }:
       <div className={styles.controls}>
         {!isActive ? (
           <button className={styles.startButton} onClick={handleStart}>
-            🚀 Start Challenge!
+            🚀 {t('Start Challenge!')}
           </button>
         ) : (
-          <p className={styles.recordingHint}>Complete the challenge before time runs out!</p>
+          <p className={styles.recordingHint}>{t('Complete the challenge before time runs out!')}</p>
         )}
       </div>
 
