@@ -1,17 +1,198 @@
 .main {
   min-height: 100vh;
-  padding: 24px 16px 32px;
+  padding: 0 0 88px;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 0;
   max-width: 1024px;
   margin: 0 auto;
+  position: relative;
 }
 
+/* Sky background (Minecraft-style clear blue) */
+.skyWrap {
+  flex: 1;
+  min-height: 100vh;
+  background: var(--gradient-sky, linear-gradient(180deg, #7DD3FC 0%, #BAE6FD 100%));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  z-index: 0;
+}
+
+/* Blocky / Minecraft-style scene layer */
+/* Scene (clouds, trees, ground) ends above the bottom nav so trees are never hidden */
+.sceneLayer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 88px;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* ---- Blocky clouds (rectangles) ---- */
+.clouds {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+.blockyCloud {
+  position: absolute;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 2px;
+  width: 80px;
+}
+@keyframes cloudDrift {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100vw); }
+}
+
+.cloudBlock {
+  width: 14px;
+  height: 14px;
+  background: var(--block-cloud);
+  border: 1px solid var(--block-cloud-edge);
+  flex-shrink: 0;
+}
+.blockyCloud {
+  animation: cloudDrift 90s linear infinite;
+}
+.blockyCloud1 { top: 8%; left: 0; width: 70px; animation-delay: 0s; }
+.blockyCloud2 { top: 18%; left: 0; width: 60px; animation-delay: -11s; }
+.blockyCloud3 { top: 35%; left: 0; width: 90px; animation-delay: -22s; }
+.blockyCloud4 { top: 50%; left: 0; width: 64px; animation-delay: -33s; }
+.blockyCloud5 { bottom: 35%; left: 0; width: 72px; animation-delay: -44s; }
+.blockyCloud6 { bottom: 22%; left: 0; width: 56px; animation-delay: -55s; }
+.blockyCloud7 { bottom: 10%; left: 0; width: 64px; animation-delay: -66s; }
+.blockyCloud8 { top: 42%; left: 0; width: 70px; animation-delay: -77s; }
+.blockyCloud1 .cloudBlock:nth-child(1) { }
+.blockyCloud1 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud1 .cloudBlock:nth-child(3) { margin-left: 2px; }
+.blockyCloud1 .cloudBlock:nth-child(4) { margin-left: 14px; }
+.blockyCloud1 .cloudBlock:nth-child(5) { margin-left: 16px; }
+.blockyCloud1 .cloudBlock:nth-child(6) { margin-left: 2px; }
+.blockyCloud2 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud2 .cloudBlock:nth-child(3) { margin-left: 14px; }
+.blockyCloud2 .cloudBlock:nth-child(4) { margin-left: 16px; }
+.blockyCloud2 .cloudBlock:nth-child(5) { margin-left: 2px; }
+.blockyCloud3 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud3 .cloudBlock:nth-child(3) { margin-left: 2px; }
+.blockyCloud3 .cloudBlock:nth-child(4) { margin-left: 14px; }
+.blockyCloud3 .cloudBlock:nth-child(5) { margin-left: 16px; }
+.blockyCloud3 .cloudBlock:nth-child(6) { margin-left: 2px; }
+.blockyCloud3 .cloudBlock:nth-child(7) { margin-left: 16px; }
+.blockyCloud4 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud4 .cloudBlock:nth-child(3) { margin-left: 14px; }
+.blockyCloud4 .cloudBlock:nth-child(4) { margin-left: 16px; }
+.blockyCloud4 .cloudBlock:nth-child(5) { margin-left: 2px; }
+.blockyCloud5 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud5 .cloudBlock:nth-child(3) { margin-left: 2px; }
+.blockyCloud5 .cloudBlock:nth-child(4) { margin-left: 14px; }
+.blockyCloud5 .cloudBlock:nth-child(5) { margin-left: 16px; }
+.blockyCloud5 .cloudBlock:nth-child(6) { margin-left: 2px; }
+.blockyCloud6 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud6 .cloudBlock:nth-child(3) { margin-left: 14px; }
+.blockyCloud6 .cloudBlock:nth-child(4) { margin-left: 16px; }
+.blockyCloud7 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud7 .cloudBlock:nth-child(3) { margin-left: 14px; }
+.blockyCloud7 .cloudBlock:nth-child(4) { margin-left: 16px; }
+.blockyCloud7 .cloudBlock:nth-child(5) { margin-left: 2px; }
+.blockyCloud8 .cloudBlock:nth-child(2) { margin-left: 16px; }
+.blockyCloud8 .cloudBlock:nth-child(3) { margin-left: 2px; }
+.blockyCloud8 .cloudBlock:nth-child(4) { margin-left: 14px; }
+.blockyCloud8 .cloudBlock:nth-child(5) { margin-left: 16px; }
+.blockyCloud8 .cloudBlock:nth-child(6) { margin-left: 2px; }
+
+/* ---- Blocky trees ---- */
+.trees {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.blockyTree {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  bottom: 0;
+}
+.treeTrunk {
+  width: 16px;
+  height: 24px;
+  background: var(--block-trunk);
+  border: 1px solid var(--block-trunk-dark);
+}
+.treeLeaves {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+  width: 44px;
+  margin-bottom: 2px;
+}
+.treeLeafBlock {
+  width: 14px;
+  height: 14px;
+  background: var(--block-leaves);
+  border: 1px solid var(--block-leaves-light);
+}
+.blockyTree1 { left: 2%; bottom: 24px; }
+.blockyTree2 { left: 18%; bottom: 24px; transform: scale(0.9); }
+.blockyTree3 { right: 22%; bottom: 24px; transform: scale(0.85); }
+.blockyTree4 { right: 5%; bottom: 24px; transform: scale(0.95); }
+.blockyTree5 { left: 35%; bottom: 24px; transform: scale(0.8); }
+.blockyTree6 { right: 38%; bottom: 24px; transform: scale(0.75); }
+
+/* ---- Blocky ground strip (grass/dirt) ---- */
+.blockyGround {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+  gap: 0;
+  pointer-events: none;
+  min-width: 100%;
+}
+.groundBlock {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  border: 1px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+.groundBlockGrass {
+  background: var(--block-grass);
+  border-color: var(--block-grass-dark);
+}
+.groundBlockDirt {
+  background: var(--block-dirt);
+  border-color: var(--block-dirt-dark);
+}
+
+.contentWrap {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 16px 16px 24px;
+}
 @media (max-width: 768px) {
-  .main {
-    padding: 16px 12px 24px;
-    gap: 24px;
+  .contentWrap {
+    padding: 12px 12px 20px;
+    gap: 20px;
   }
 }
 
@@ -20,13 +201,14 @@
   top: 0;
   z-index: 50;
   width: 100%;
-  min-height: 72px;
+  min-height: 64px;
   display: flex;
   align-items: center;
-  background: rgba(22, 33, 62, 0.95);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 4px solid rgba(255, 107, 53, 0.4);
+  border-bottom: 3px solid rgba(255, 107, 53, 0.35);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .headerInner {
@@ -47,15 +229,67 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
+}
+
+.headerAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 3px solid var(--primary);
+  background: rgba(255, 107, 53, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.headerAvatarEmoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.headerLevelBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+.headerLevelText {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--background);
+  line-height: 1;
+}
+.headerLevelBar {
+  height: 6px;
+  width: 72px;
+  border-radius: 9999px;
+  background: rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+.headerLevelBarFill {
+  height: 100%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+  transition: width 0.3s ease;
 }
 
 .logoContainer {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+@media (max-width: 600px) {
+  .logoContainer .logoText,
+  .logoContainer .servedBy {
+    display: none;
+  }
 }
 
 .logoMark {
@@ -84,11 +318,11 @@
 }
 
 .logoFitHero {
-  color: #8B9BD4;
+  color: var(--primary);
 }
 
 .logoKids {
-  color: #B794F6;
+  color: #E85D04;
 }
 
 .logoText {
@@ -112,7 +346,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--secondary);
+  color: #0F3460;
   margin: 0;
 }
 
@@ -144,23 +378,6 @@
 
 .levelBadge {
   display: none;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 10px;
-  border-radius: 12px;
-  border: 3px solid var(--accent);
-  background: rgba(255, 230, 109, 0.1);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-@media (min-width: 640px) {
-  .levelBadge {
-    display: inline-flex;
-  }
 }
 
 .langToggle {
@@ -168,9 +385,9 @@
   align-items: center;
   gap: 0;
   border-radius: 10px;
-  border: 2px solid var(--border);
+  border: 2px solid rgba(0, 0, 0, 0.12);
   overflow: hidden;
-  background: var(--muted);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .langBtn {
@@ -186,8 +403,8 @@
 }
 
 .langBtn:hover {
-  background: var(--background);
-  color: var(--foreground);
+  background: rgba(0, 0, 0, 0.08);
+  color: #1A1A2E;
 }
 
 .langBtnActive {
@@ -212,4 +429,24 @@
 
 .contentSection {
   width: 100%;
+}
+
+/* Challenges section: lower on page, minimal gap above trees */
+.challengesSection {
+  width: 100%;
+  margin-top: 12px;
+  padding-bottom: 18px;
+}
+
+/* Bottom nav (Phase 2) */
+.bottomNavWrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 8px 8px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
 }

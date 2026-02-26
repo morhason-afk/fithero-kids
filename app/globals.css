@@ -6,6 +6,8 @@
 
 .app-root {
   pointer-events: auto;
+  min-height: 100vh;
+  min-width: 100%;
 }
 
 html,

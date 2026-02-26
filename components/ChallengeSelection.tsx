@@ -57,73 +57,94 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
           {mounted ? sortedChallenges.filter((c, i) => isChallengeUnlocked(c, challengeProgress, getMinStarsToUnlock(c)) && !(challengeRequiresSubscription(i) && !hasSubscription)).length : 0} {t('available')}
         </span>
       </div>
-      
-      <div className={styles.challengeGrid}>
-        {sortedChallenges.map((challenge, index) => {
-          const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
-          const subscriptionLocked = challengeRequiresSubscription(index) && !hasSubscription
-          const progress = getProgress(challenge.id)
-          const bestStars = progress?.bestStars || 0
-          const showLock = !unlocked || subscriptionLocked
-          const { min: rewardMin, max: rewardMax } = getRewardRange(challenge)
-          const prevChallenge = sortedChallenges[index - 1]
-          const minStars = getMinStarsToUnlock(challenge)
-          const prevTitle = prevChallenge?.title ?? t('previous challenge')
-          const lockReason = !unlocked
-            ? `${t('Need')} ${minStars} ${minStars === 1 ? t('star') : t('stars')} ${t('on')} ${prevTitle}`
-            : subscriptionLocked
-              ? t('Subscribe to unlock')
-              : ''
 
-          return (
-            <div
-              key={challenge.id}
-              className={`${styles.challengeCard} ${
-                showLock ? styles.locked : ''
-              } ${hoveredId === challenge.id ? styles.hovered : ''}`}
-              onMouseEnter={() => unlocked && setHoveredId(challenge.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              onClick={() => handleChallengeClick(challenge, index)}
-            >
-              {showLock && (
-                <div className={styles.lockOverlay}>
-                  <div className={styles.lockIcon}>🔒</div>
-                  <div className={styles.lockText}>{lockReason}</div>
-                  {subscriptionLocked && (
-                    <button type="button" className={styles.unlockButton} onClick={(e) => { e.stopPropagation(); showSubscriptionMessage('challenges'); }}>
-                      {t('UNLOCK NOW')}
-                    </button>
-                  )}
-                </div>
-              )}
-              {!progress && unlocked && !subscriptionLocked && index !== 3 && (
-                <div className={styles.tagNew}>{t('New')}</div>
-              )}
-              {unlocked && !subscriptionLocked && isPopular(index) && (
-                <div className={styles.tagPopular}>{t('Popular')}</div>
-              )}
+      {/* Progress map: vertical, snake shape, empty tracks between milestones */}
+      <div className={styles.progressMapVertical}>
+        <div className={styles.challengePathVertical}>
+          <div className={styles.startNode} aria-hidden>
+            <span className={styles.startLabel}>START</span>
+            <span className={styles.startFlag}>🚩</span>
+          </div>
+          <div className={`${styles.emptyTrack} ${styles.emptyTrackCenter}`} aria-hidden>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className={styles.emptyTrackBlock} />
+            ))}
+          </div>
+          {sortedChallenges.map((challenge, index) => {
+            const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
+            const subscriptionLocked = challengeRequiresSubscription(index) && !hasSubscription
+            const progress = getProgress(challenge.id)
+            const showLock = !unlocked || subscriptionLocked
+            const prevChallenge = sortedChallenges[index - 1]
+            const minStars = getMinStarsToUnlock(challenge)
+            const prevTitle = prevChallenge?.title ?? t('previous challenge')
+            const lockReason = !unlocked
+              ? `${t('Need')} ${minStars} ${minStars === 1 ? t('star') : t('stars')} ${t('on')} ${prevTitle}`
+              : subscriptionLocked
+                ? t('Subscribe to unlock')
+                : ''
+            const isLeft = index % 2 === 0
 
-              <div className={styles.cardRow}>
-                <div className={styles.iconLeft}>
-                  {showLock ? <span className={styles.lockEmoji} aria-hidden>🔒</span> : <span className={styles.icon}>{challenge.icon}</span>}
-                </div>
-                <div className={styles.cardContent}>
-                  <h3 className={styles.challengeTitle}>{t(challenge.title)}</h3>
-                  <p className={styles.challengeDesc}>{t(challenge.description)}</p>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.duration}>{challenge.duration} {t('sec')}</span>
-                    {!showLock && (
-                      <span className={styles.rewardRange}>
-                        <span className={styles.diamond} aria-hidden>💎</span>
-                        {rewardMin}-{rewardMax}
-                      </span>
-                    )}
+            return (
+              <div key={challenge.id} className={styles.pathSegmentVertical}>
+                {index > 0 && (
+                  <div className={`${styles.diagonalConnector} ${isLeft ? styles.diagonalToLeft : styles.diagonalToRight}`} aria-hidden>
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className={styles.diagonalBlock} />
+                    ))}
                   </div>
+                )}
+                <div className={`${styles.emptyTrack} ${isLeft ? styles.emptyTrackLeft : styles.emptyTrackRight}`} aria-hidden>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className={styles.emptyTrackBlock} />
+                  ))}
+                </div>
+                <div className={`${styles.milestoneWrap} ${isLeft ? styles.milestoneWrapLeft : styles.milestoneWrapRight}`}>
+                  <button
+                    type="button"
+                    className={`${styles.pathNode} ${styles.milestoneNode} ${showLock ? styles.pathNodeLocked : ''} ${hoveredId === challenge.id ? styles.pathNodeHovered : ''}`}
+                    onMouseEnter={() => !showLock && setHoveredId(challenge.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onClick={() => handleChallengeClick(challenge, index)}
+                    disabled={showLock}
+                    aria-label={`${t('Challenges')} ${index + 1}: ${t(challenge.title)}`}
+                  >
+                    <span className={styles.milestoneFlag} aria-hidden>🚩</span>
+                    <span className={styles.milestoneBadge}>{index + 1}</span>
+                    {showLock ? (
+                      <span className={styles.pathNodeIcon} aria-hidden>🔒</span>
+                    ) : (
+                      <span className={styles.pathNodeIcon} aria-hidden>{challenge.icon}</span>
+                    )}
+                    <span className={styles.pathNodeLabel}>{t(challenge.title)}</span>
+                    {!showLock && progress && progress.bestStars > 0 && (
+                      <span className={styles.pathNodeStars}>★{progress.bestStars}</span>
+                    )}
+                    {showLock && (
+                      <div className={styles.pathNodeLockOverlay}>
+                        <span className={styles.pathNodeLockText}>{lockReason}</span>
+                        {subscriptionLocked && (
+                          <button type="button" className={styles.pathNodeUnlockBtn} onClick={(e) => { e.stopPropagation(); showSubscriptionMessage('challenges'); }}>
+                            {t('UNLOCK NOW')}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </button>
                 </div>
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+          <div className={`${styles.emptyTrack} ${styles.emptyTrackCenter}`} aria-hidden>
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className={styles.emptyTrackBlock} />
+            ))}
+          </div>
+          <div className={styles.endNode} aria-hidden>
+            <span className={styles.endFlag}>🏁</span>
+            <span className={styles.endLabel}>GOAL</span>
+          </div>
+        </div>
       </div>
     </div>
   )

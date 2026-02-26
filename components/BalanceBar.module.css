@@ -10,18 +10,23 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: 12px;
-  border: 3px solid var(--border);
-  background: rgba(255, 107, 53, 0.1);
+  border-radius: 9999px;
+  border: 2px solid rgba(0, 0, 0, 0.12);
   font-weight: 700;
   font-size: 0.875rem;
-  color: var(--primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.diamonds {
+  background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%);
+  color: #B45309;
+  border-color: rgba(245, 158, 11, 0.4);
 }
 
 .stars {
-  background: var(--muted);
-  color: var(--card-foreground);
-  border-color: var(--accent);
+  background: linear-gradient(180deg, #E0E7FF 0%, #C7D2FE 100%);
+  color: #3730A3;
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .diamonds .label,

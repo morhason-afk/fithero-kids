@@ -27,6 +27,24 @@
   --gradient-hero: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, var(--card) 50%, rgba(0, 245, 212, 0.1) 100%);
   --gradient-gold: linear-gradient(135deg, #F1C40F 0%, #F39C12 50%, #E67E22 100%);
   --gradient-energy: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%);
+
+  /* Adventure / sky theme (Phase 1) */
+  --sky-top: #7DD3FC;
+  --sky-bottom: #BAE6FD;
+  --sky-cloud: rgba(255, 255, 255, 0.85);
+  --gradient-sky: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
+
+  /* Minecraft-style blocks */
+  --block-cloud: #FFFFFF;
+  --block-cloud-edge: #E8E8E8;
+  --block-grass: #5DAF3C;
+  --block-grass-dark: #4A8B2F;
+  --block-dirt: #8B5A2B;
+  --block-dirt-dark: #6B4423;
+  --block-trunk: #6B4423;
+  --block-trunk-dark: #5A3A1F;
+  --block-leaves: #2D5016;
+  --block-leaves-light: #3D6B20;
 }
 
 /* Force dark base so theme is never overridden by other CSS */

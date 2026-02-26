@@ -15,7 +15,7 @@
   font-family: 'Fredoka', sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--foreground);
+  color: #1A1A2E;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -25,13 +25,13 @@
   flex: 1;
   height: 4px;
   border-radius: 9999px;
-  background: var(--border);
+  background: linear-gradient(90deg, var(--primary) 0%, transparent 100%);
 }
 
 .titleMeta {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--muted-foreground);
+  color: #475569;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -82,6 +82,394 @@
   font-weight: 700;
   font-family: 'Fredoka', sans-serif;
   color: var(--primary);
+}
+
+/* ========== Vertical progress map (snake, top-to-bottom) ========== */
+.progressMapVertical {
+  margin: 0 -8px;
+  padding: 0 8px 12px;
+  max-height: 52vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.progressMapVertical::-webkit-scrollbar {
+  width: 6px;
+}
+
+.progressMapVertical::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.4);
+  border-radius: 3px;
+}
+
+.challengePathVertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 8px 12px 16px;
+  min-width: min-content;
+}
+
+.challengePathVertical .startNode {
+  align-self: center;
+  margin-bottom: 0;
+}
+
+.challengePathVertical .endNode {
+  align-self: center;
+  margin-top: 0;
+}
+
+.pathSegmentVertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Diagonal connector: line of blocky rectangles between left/right tracks */
+.diagonalConnector {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 2px 0;
+  flex-shrink: 0;
+  height: 44px;
+  justify-content: center;
+}
+
+.diagonalConnector .diagonalBlock {
+  width: 12px;
+  height: 10px;
+  background: var(--block-dirt, #8B5A2B);
+  border: 1px solid var(--block-dirt-dark, #6B4423);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.diagonalToRight .diagonalBlock:nth-child(1) { margin-left: 0; }
+.diagonalToRight .diagonalBlock:nth-child(2) { margin-left: 10px; }
+.diagonalToRight .diagonalBlock:nth-child(3) { margin-left: 20px; }
+.diagonalToRight .diagonalBlock:nth-child(4) { margin-left: 30px; }
+
+.diagonalToLeft {
+  align-items: flex-end;
+}
+
+.diagonalToLeft .diagonalBlock:nth-child(1) { margin-right: 0; }
+.diagonalToLeft .diagonalBlock:nth-child(2) { margin-right: 10px; }
+.diagonalToLeft .diagonalBlock:nth-child(3) { margin-right: 20px; }
+.diagonalToLeft .diagonalBlock:nth-child(4) { margin-right: 30px; }
+
+/* Empty track: vertical strip of blocky path (long journey feel) */
+.emptyTrack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin: 2px 0;
+  flex-shrink: 0;
+}
+
+.emptyTrackBlock {
+  width: 20px;
+  height: 14px;
+  background: var(--block-dirt, #8B5A2B);
+  border: 1px solid var(--block-dirt-dark, #6B4423);
+  border-radius: 2px;
+}
+
+.emptyTrackLeft {
+  align-self: flex-start;
+  margin-left: calc(50% - 60px);
+}
+
+.emptyTrackRight {
+  align-self: flex-end;
+  margin-right: calc(50% - 60px);
+}
+
+.emptyTrackCenter {
+  align-self: center;
+}
+
+.milestoneWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: -2px;
+  margin-bottom: 0;
+}
+
+.milestoneWrapLeft {
+  justify-content: flex-start;
+  padding-left: 8px;
+}
+
+.milestoneWrapRight {
+  justify-content: flex-end;
+  padding-right: 8px;
+}
+
+/* Flag indicator on each challenge milestone */
+.milestoneFlag {
+  position: absolute;
+  top: -6px;
+  right: 6px;
+  font-size: 1rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.3));
+}
+
+/* Legacy horizontal (keep for pathConnector etc if used elsewhere) */
+.progressMap {
+  position: relative;
+  margin: 0 -8px;
+  padding: 0 8px 8px;
+}
+
+.mapPath {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 42px;
+  height: 24px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--block-dirt, #8B5A2B) 0px,
+    var(--block-dirt, #8B5A2B) 12px,
+    var(--block-dirt-dark, #6B4423) 12px,
+    var(--block-dirt-dark, #6B4423) 14px
+  );
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.challengePath {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 12px 12px 20px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  min-height: 160px;
+}
+
+.challengePath::-webkit-scrollbar {
+  height: 8px;
+}
+
+.challengePath::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.4);
+  border-radius: 4px;
+}
+
+.startNode,
+.endNode {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 199, 0.9) 100%);
+  border: 3px solid rgba(34, 197, 94, 0.5);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.startLabel,
+.endLabel {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #166534;
+  letter-spacing: 0.05em;
+}
+
+.startFlag,
+.endFlag {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.endNode {
+  border-color: rgba(255, 107, 53, 0.5);
+}
+
+.endLabel {
+  color: var(--primary);
+}
+
+.pathSegment {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.pathConnectorBlocky {
+  width: 16px;
+  min-width: 16px;
+  height: 16px;
+  margin: 0 2px;
+  background: var(--block-dirt, #8B5A2B);
+  border: 1px solid var(--block-dirt-dark, #6B4423);
+  align-self: center;
+  margin-bottom: 52px;
+  flex-shrink: 0;
+}
+
+.milestoneBadge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  background: var(--primary);
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.milestoneNode {
+  margin-bottom: 0;
+}
+
+.pathNode {
+  position: relative;
+  width: 88px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border-radius: 20px;
+  border: 3px solid rgba(255, 107, 53, 0.4);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 243, 199, 0.9) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.pathNode:hover:not(:disabled),
+.pathNode.pathNodeHovered:not(:disabled) {
+  transform: scale(1.06);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.25);
+  border-color: var(--primary);
+}
+
+.pathNode:disabled {
+  cursor: not-allowed;
+}
+
+.pathNodeLocked {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(226, 232, 240, 0.95) 100%);
+  border-color: rgba(0, 0, 0, 0.12);
+  opacity: 0.9;
+}
+
+.pathNodeIcon {
+  font-size: 2rem;
+  line-height: 1;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 107, 53, 0.3);
+}
+
+.pathNodeLocked .pathNodeIcon {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.pathNodeLabel {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1A1A2E;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pathNodeStars {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.pathConnector {
+  width: 24px;
+  min-width: 24px;
+  height: 4px;
+  margin: 0 2px;
+  background: linear-gradient(90deg, rgba(255, 107, 53, 0.5) 0%, rgba(255, 107, 53, 0.3) 100%);
+  border-radius: 2px;
+  align-self: center;
+  margin-bottom: 36px;
+}
+
+.pathNodeLockOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  gap: 6px;
+}
+
+.pathNodeLockText {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.pathNodeUnlockBtn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: white;
+  border: none;
+  cursor: pointer;
 }
 
 .challengeGrid {

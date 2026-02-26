@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useHero } from '@/contexts/HeroContext'
 import { useConfig } from '@/contexts/ConfigContext'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -11,11 +11,15 @@ import HeroNameEditor, { getStoredHeroName } from './HeroNameEditor'
 import ShareButton from './ShareButton'
 import styles from './HeroSection.module.css'
 
+export interface HeroSectionRef {
+  openCustomizer: () => void
+}
+
 interface HeroSectionProps {
   onPlayNow?: () => void
 }
 
-export default function HeroSection({ onPlayNow }: HeroSectionProps) {
+const HeroSection = forwardRef<HeroSectionRef, HeroSectionProps>(function HeroSection({ onPlayNow }, ref) {
   const { hero } = useHero()
   const { config } = useConfig()
   const { t } = useLanguage()
@@ -37,12 +41,16 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
     else document.getElementById('challenges')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const openCharacterCustomizer = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const openCharacterCustomizer = (e?: React.MouseEvent) => {
+    e?.preventDefault()
+    e?.stopPropagation()
     setCustomizerSection('character')
     setCustomizerOpen(true)
   }
+
+  useImperativeHandle(ref, () => ({
+    openCustomizer: () => openCharacterCustomizer(),
+  }), [])
 
   return (
     <>
@@ -90,7 +98,7 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
             <button type="button" className={styles.playNowButton} onClick={handlePlayNow}>
               {t('✨ Play Now')}
             </button>
-            <button type="button" className={styles.customizeCharacterButton} onClick={openCharacterCustomizer}>
+            <button type="button" className={styles.customizeCharacterButton} onClick={(e) => openCharacterCustomizer(e)}>
               {t('Customize')}
             </button>
             <ShareButton shareContainerRef={shareContainerRef} />
@@ -111,4 +119,6 @@ export default function HeroSection({ onPlayNow }: HeroSectionProps) {
       />
     </>
   )
-}
+})
+
+export default HeroSection

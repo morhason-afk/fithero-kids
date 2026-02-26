@@ -55,9 +55,6 @@ export default function SupportModal({ supportEmail, onClose }: SupportModalProp
       })
 
       const data = await res.json().catch(() => ({}))
-      // Debug: so you can see the response in Console and Network → send-email → Response
-      console.log('[Contact support]', res.status, data)
-
       if (!res.ok) {
         // Prefer details (e.g. Resend error) so user sees the real reason
         const msg = data?.details || data?.error || 'Failed to send email. Please try again.'
