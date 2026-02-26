@@ -2,6 +2,7 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 
 const apiKey = process.env.RESEND_API_KEY
+// From address: use your Resend sender, e.g. "FitHero Kids <fitherokids-support@juuzoraan.resend.app>"
 const fromEmail = process.env.RESEND_FROM_EMAIL || 'FitHero Kids <onboarding@resend.dev>'
 
 export async function POST(request: NextRequest) {
@@ -49,9 +50,11 @@ export async function POST(request: NextRequest) {
     })
 
     if (error) {
-      const msg = error instanceof Error ? error.message : JSON.stringify(error)
+      const msg =
+        (error as { message?: string })?.message ||
+        (error instanceof Error ? error.message : JSON.stringify(error))
       return NextResponse.json(
-        { error: 'Failed to send email', details: msg },
+        { error: `Failed to send email: ${msg}`, details: msg },
         { status: 500 }
       )
     }
@@ -59,6 +62,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, messageId: data?.id, message: 'Email sent successfully' })
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
-    return NextResponse.json({ error: 'Server error', details: msg }, { status: 500 })
+    return NextResponse.json(
+      { error: `Server error: ${msg}`, details: msg },
+      { status: 500 }
+    )
   }
 }
