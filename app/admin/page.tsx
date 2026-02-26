@@ -21,7 +21,6 @@ function seedConfigFromChallenges(): AdminConfig {
       : {},
     subscriptionMonthlyPriceUsd: typeof current.subscriptionMonthlyPriceUsd === 'number' ? current.subscriptionMonthlyPriceUsd : 4.99,
     supportEmail: typeof current.supportEmail === 'string' && current.supportEmail.trim() ? current.supportEmail.trim() : 'support@example.com',
-    experiencePerLevel: typeof current.experiencePerLevel === 'number' && current.experiencePerLevel >= 1 ? current.experiencePerLevel : defaults.experiencePerLevel,
     xpPerCustomization: typeof current.xpPerCustomization === 'number' && current.xpPerCustomization >= 0 ? current.xpPerCustomization : defaults.xpPerCustomization,
     xpPerChallengeMax: typeof current.xpPerChallengeMax === 'number' && current.xpPerChallengeMax >= 0 ? current.xpPerChallengeMax : defaults.xpPerChallengeMax,
   }
@@ -90,12 +89,6 @@ export default function AdminPage() {
 
   const setSupportEmail = (value: string) => {
     setConfigState({ ...config, supportEmail: value })
-    setSaved(false)
-  }
-
-  const setExperiencePerLevel = (value: number) => {
-    const n = Math.max(1, Math.round(value))
-    setConfigState({ ...config, experiencePerLevel: n })
     setSaved(false)
   }
 
@@ -231,20 +224,8 @@ export default function AdminPage() {
         </section>
 
         <section className={styles.section}>
-          <h2 className={styles.sectionTitle}>XP & level progression</h2>
-          <p className={styles.hint}>XP per level: points needed to level up. XP per customization: points per skin/outfit/accessory/face change. Max XP per challenge: awarded by stars (1 star = ⅓ max, 2 = ⅔, 3 = max).</p>
-          <div className={styles.fieldRow}>
-            <label className={styles.label}>XP per level</label>
-            <input
-              type="number"
-              min={1}
-              max={999}
-              value={config.experiencePerLevel}
-              onChange={(e) => setExperiencePerLevel(Number(e.target.value))}
-              className={styles.input}
-            />
-            <span className={styles.unit}>points</span>
-          </div>
+          <h2 className={styles.sectionTitle}>XP progression</h2>
+          <p className={styles.hint}>XP per customization: points per skin/outfit/accessory/face change. Max XP per challenge: awarded by stars (1 star = ⅓ max, 2 = ⅔, 3 = max).</p>
           <div className={styles.fieldRow}>
             <label className={styles.label}>XP per customization</label>
             <input

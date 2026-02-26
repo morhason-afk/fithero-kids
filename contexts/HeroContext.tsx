@@ -110,10 +110,7 @@ export function HeroProvider({ children }: { children: ReactNode }) {
   }
 
   const addXp = (xp: number) => {
-    const perLevel = typeof config.experiencePerLevel === 'number' && config.experiencePerLevel >= 1
-      ? config.experiencePerLevel
-      : EXPERIENCE_PER_LEVEL
-    setHero(prev => addXpToHero(prev, xp, perLevel))
+    setHero(prev => addXpToHero(prev, xp, EXPERIENCE_PER_LEVEL))
   }
 
   const spendCoins = (coins: number): boolean => {

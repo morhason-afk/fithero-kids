@@ -11,8 +11,6 @@ export interface AdminConfig {
   subscriptionMonthlyPriceUsd: number
   /** Support email for "Contact support" (mailto). */
   supportEmail: string
-  /** XP required per level (e.g. 20 = level up every 20 XP). */
-  experiencePerLevel: number
   /** XP granted per customization change (e.g. 1). */
   xpPerCustomization: number
   /** Max XP granted per challenge completion; scaled by stars (1→⅓, 2→⅔, 3→max). */

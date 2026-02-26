@@ -2,7 +2,7 @@ export interface Challenge {
   id: string
   title: string
   description: string
-  exerciseType: 'jumping-jacks' | 'squats' | 'push-ups' | 'stretching' | 'dancing' | 'running' | 'plank' | 'burpees' | 'lunges' | 'high-knees' | 'boxing' | 'fruit-ninja'
+  exerciseType: 'jumping-jacks' | 'squats' | 'push-ups' | 'stretching' | 'dancing' | 'running' | 'plank' | 'burpees' | 'lunges' | 'high-knees' | 'boxing' | 'match-it' | 'jumps' | 'bear-crawls' | 'frog-jumps' | 'crab-walk' | 'wall-sits' | 'supermans'
   duration: number // in seconds (max 15)
   difficulty: 'easy' | 'medium' | 'hard'
   icon: string

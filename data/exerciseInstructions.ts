@@ -92,24 +92,102 @@ export const EXERCISE_INSTRUCTIONS: Record<string, ExerciseInstruction> = {
     steps: [
       'Stand facing the camera',
       'Make fists with both hands',
-      'Throw punches at the targets',
-      'Alternate between left and right punches',
-      'Keep your guard up and have fun!'
+      'Throw punches forward at the camera',
+      'Every punch you throw will be counted!',
+      'Throw as many as you can before time runs out.'
     ],
     emoji: '🥊',
-    visualHint: '👊 → 🎯 → 👊 → 🎯'
+    visualHint: '👊 → 👊 → 👊'
   },
-  'fruit-ninja': {
-    exerciseType: 'fruit-ninja',
-    title: 'Fruit Ninja',
+  'match-it': {
+    exerciseType: 'match-it',
+    title: 'Match it!',
     steps: [
-      'Stand facing the camera',
-      'Watch for objects falling from the sky',
-      'Wave your hands to hit them',
-      'Move your arms up and down quickly',
-      'Try to hit as many as you can!'
+      'Look at the shape shown on screen',
+      'Use your body to make the same shape',
+      'Stretch your arms and move to match',
+      'Hold the pose when you have it!',
+      'Have fun being a human shape!'
     ],
-    emoji: '🍎',
-    visualHint: '👋 → 🍎 → ✨ → 👋 → 🍌 → ✨'
+    emoji: '🔷',
+    visualHint: '👤 → 🔷 → ✨'
+  },
+  'jumps': {
+    exerciseType: 'jumps',
+    title: 'Jumps',
+    steps: [
+      'Stand in place facing the camera',
+      'Jump straight up and land softly',
+      'We count every jump you do',
+      'Jump as many times as you can!',
+      'Bend your knees when you land.'
+    ],
+    emoji: '⬆️',
+    visualHint: '👤 → ⬆️ → 👤 → ⬆️'
+  },
+  'bear-crawls': {
+    exerciseType: 'bear-crawls',
+    title: 'Bear Crawls',
+    steps: [
+      'Get on your hands and feet on the floor',
+      'Keep your hips high in the air',
+      'Move across the room on hands and feet',
+      'Great for shoulder stability!',
+      'Keep your back flat like a table.'
+    ],
+    emoji: '🐻',
+    visualHint: '🐻 → 🐻 → 🐻'
+  },
+  'frog-jumps': {
+    exerciseType: 'frog-jumps',
+    title: 'Frog Jumps',
+    steps: [
+      'Squat down low like a frog',
+      'Explode upward in a jump',
+      'Land softly and squat again',
+      'Excellent for leg power!',
+      'Push through your feet to jump.'
+    ],
+    emoji: '🐸',
+    visualHint: '🐸 → ⬆️ → 🐸'
+  },
+  'crab-walk': {
+    exerciseType: 'crab-walk',
+    title: 'Crab Walk',
+    steps: [
+      'Sit on the floor with hands behind you',
+      'Lift your hips off the floor',
+      'Walk on your hands and feet',
+      'Move forward or sideways!',
+      'A secret core and arm workout.'
+    ],
+    emoji: '🦀',
+    visualHint: '🦀 → 🦀 → 🦀'
+  },
+  'wall-sits': {
+    exerciseType: 'wall-sits',
+    title: 'Wall Sits',
+    steps: [
+      'Stand with your back against a wall',
+      'Slide down until knees are at 90 degrees',
+      '"Sit" without a chair!',
+      'Hold as long as you can',
+      'See if you can last the whole time!'
+    ],
+    emoji: '🧱',
+    visualHint: '🧱 👤 ⏱️'
+  },
+  'supermans': {
+    exerciseType: 'supermans',
+    title: 'Supermans',
+    steps: [
+      'Lie on your belly on the floor',
+      'Lift your arms and legs off the floor',
+      'You\'re "flying" over a city!',
+      'Hold for a few seconds',
+      'Lower and repeat. You\'re a superhero!'
+    ],
+    emoji: '🦸',
+    visualHint: '🦸 ✈️'
   },
 }

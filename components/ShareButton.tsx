@@ -24,14 +24,13 @@ export default function ShareButton({ shareContainerRef }: ShareButtonProps) {
   const outfitId = hero.cosmetics.characterBuild?.outfitId || DEFAULT_OUTFIT_ID
   const outfit = getOutfitById(outfitId)
   const outfitName = outfit?.name ?? 'My Hero'
-  const level = hero.stats.level
   const sharingRef = useRef(false)
   const [sharing, setSharing] = useState(false)
 
   const getShareText = useCallback(() => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
-    return `Check out my ${APP_NAME} character! I'm Level ${level} with ${outfitName}! 🦸 ${SHARE_HASHTAG}\n\nPlay too: ${url}`
-  }, [level, outfitName])
+    return `Check out my ${APP_NAME} character! ${outfitName}! 🦸 ${SHARE_HASHTAG}\n\nPlay too: ${url}`
+  }, [outfitName])
 
   const handleShare = useCallback(async () => {
     if (sharingRef.current) return

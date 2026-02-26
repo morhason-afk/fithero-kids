@@ -2,17 +2,15 @@
 
 import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useHero } from '@/contexts/HeroContext'
-import { useConfig } from '@/contexts/ConfigContext'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { getXpProgress } from '@/utils/heroUtils'
 import HeroCharacter from './HeroCharacter'
 import HeroCustomizer, { type CustomizerSection } from './HeroCustomizer'
 import HeroNameEditor, { getStoredHeroName } from './HeroNameEditor'
-import ShareButton from './ShareButton'
 import styles from './HeroSection.module.css'
 
 export interface HeroSectionRef {
   openCustomizer: () => void
+  shareContainerRef: React.RefObject<HTMLDivElement | null>
 }
 
 interface HeroSectionProps {
@@ -21,11 +19,7 @@ interface HeroSectionProps {
 
 const HeroSection = forwardRef<HeroSectionRef, HeroSectionProps>(function HeroSection({ onPlayNow }, ref) {
   const { hero } = useHero()
-  const { config } = useConfig()
   const { t } = useLanguage()
-  const experiencePerLevel = typeof config.experiencePerLevel === 'number' && config.experiencePerLevel >= 1 ? config.experiencePerLevel : 20
-  const { xpInLevel, xpNeeded } = getXpProgress(hero.stats.experience, experiencePerLevel)
-  const xpPercent = xpNeeded > 0 ? Math.round((xpInLevel / xpNeeded) * 100) : 0
   const shareContainerRef = useRef<HTMLDivElement>(null)
   const [customizerOpen, setCustomizerOpen] = useState(false)
   const [customizerSection, setCustomizerSection] = useState<CustomizerSection>('character')
@@ -50,7 +44,8 @@ const HeroSection = forwardRef<HeroSectionRef, HeroSectionProps>(function HeroSe
 
   useImperativeHandle(ref, () => ({
     openCustomizer: () => openCharacterCustomizer(),
-  }), [])
+    shareContainerRef,
+  }), [shareContainerRef])
 
   return (
     <>
@@ -80,20 +75,10 @@ const HeroSection = forwardRef<HeroSectionRef, HeroSectionProps>(function HeroSe
         </div>
         <div className={styles.heroCopy}>
           <div className={styles.heroBadges}>
-            <span className={styles.badgeLevel}>{t('Level')} {hero.stats.level}</span>
             <span className={styles.badgeFitHero}>{t('FitHero')}</span>
           </div>
           <h2 className={styles.heroHeadline}>{t('Ready to Move?')}</h2>
           <p className={styles.heroSubline}>{t('Complete challenges, earn diamonds, and become the ultimate FitHero!')}</p>
-          <div className={styles.heroXpBar}>
-            <div className={styles.heroXpLabel}>
-              <span>{t('XP Progress')}</span>
-              <span>{xpInLevel} / {xpNeeded}</span>
-            </div>
-            <div className={styles.heroXpTrack}>
-              <div className={styles.heroXpFill} style={{ width: `${xpPercent}%`, background: 'linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 50%, var(--accent) 100%)', boxShadow: '0 0 12px rgba(255, 107, 53, 0.5)' }} role="progressbar" aria-valuenow={xpInLevel} aria-valuemin={0} aria-valuemax={xpNeeded} />
-            </div>
-          </div>
           <div className={styles.heroCtaRow}>
             <button type="button" className={styles.playNowButton} onClick={handlePlayNow}>
               {t('✨ Play Now')}
@@ -101,7 +86,6 @@ const HeroSection = forwardRef<HeroSectionRef, HeroSectionProps>(function HeroSe
             <button type="button" className={styles.customizeCharacterButton} onClick={(e) => openCharacterCustomizer(e)}>
               {t('Customize')}
             </button>
-            <ShareButton shareContainerRef={shareContainerRef} />
           </div>
         </div>
       </div>

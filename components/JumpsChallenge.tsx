@@ -3,21 +3,24 @@
 import { useState, useRef, useEffect } from 'react'
 import { Challenge } from '@/types/challenge'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { initializePoseDetector, detectPose, getHandPositions, isPunching } from '@/utils/poseDetection'
+import { initializePoseDetector, detectPose, getBodyCenterY } from '@/utils/poseDetection'
 import { playSound } from '@/utils/sounds'
 import styles from './BoxingChallenge.module.css'
 
-interface BoxingChallengeProps {
+interface JumpsChallengeProps {
   challenge: Challenge
-  onComplete: (score: number, punches: number, totalTargets: number) => void
+  onComplete: (jumpCount: number) => void
   onCancel: () => void
 }
 
-export default function BoxingChallenge({ challenge, onComplete, onCancel }: BoxingChallengeProps) {
+const JUMP_THRESHOLD = 25
+const LAND_DEBOUNCE_MS = 400
+
+export default function JumpsChallenge({ challenge, onComplete, onCancel }: JumpsChallengeProps) {
   const { t } = useLanguage()
   const [isActive, setIsActive] = useState(false)
   const [timeRemaining, setTimeRemaining] = useState(challenge.duration)
-  const [punches, setPunches] = useState(0)
+  const [jumps, setJumps] = useState(0)
   const [cameraStatus, setCameraStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [error, setError] = useState<string | null>(null)
 
@@ -27,12 +30,10 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
   const animationFrameRef = useRef<number | null>(null)
   const detectorRef = useRef<any>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const previousHandPositionsRef = useRef<{ leftWrist: { x: number; y: number } | null; rightWrist: { x: number; y: number } | null }>({
-    leftWrist: null,
-    rightWrist: null,
-  })
-  const handPositionsRef = useRef<{ leftWrist: { x: number; y: number } | null; rightWrist: { x: number; y: number } | null; leftElbow: { x: number; y: number } | null; rightElbow: { x: number; y: number } | null }>({ leftWrist: null, rightWrist: null, leftElbow: null, rightElbow: null })
-  const punchesRef = useRef(0)
+  const jumpsRef = useRef(0)
+  const baselineYRef = useRef<number | null>(null)
+  const inAirRef = useRef(false)
+  const lastLandTimeRef = useRef(0)
   const isActiveRef = useRef(false)
 
   useEffect(() => {
@@ -121,104 +122,71 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
       }
     }
 
-    const updateHands = () => {
+    const updatePose = () => {
       if (!detectorRef.current || !isActiveRef.current) return
       const vw = video.videoWidth || 0
       const vh = video.videoHeight || 0
       if (vw < 10 || vh < 10) {
-        setTimeout(updateHands, 100)
+        setTimeout(updatePose, 100)
         return
       }
       detectPose(detectorRef.current, video).then(pose => {
         if (!isActiveRef.current) return
-        const hands = getHandPositions(pose)
-        const nw = video.videoWidth || vw
-        const nh = video.videoHeight || vh
-        const cw = canvas.width || 640
-        const ch = canvas.height || 480
-        const scaleX = (x: number) => cw - (x / nw) * cw
-        const scaleY = (y: number) => (y / nh) * ch
-        handPositionsRef.current = {
-          leftWrist: hands.leftWrist ? { x: scaleX(hands.leftWrist.x), y: scaleY(hands.leftWrist.y) } : null,
-          rightWrist: hands.rightWrist ? { x: scaleX(hands.rightWrist.x), y: scaleY(hands.rightWrist.y) } : null,
-          leftElbow: hands.leftElbow ? { x: scaleX(hands.leftElbow.x), y: scaleY(hands.leftElbow.y) } : null,
-          rightElbow: hands.rightElbow ? { x: scaleX(hands.rightElbow.x), y: scaleY(hands.rightElbow.y) } : null,
+        const bodyY = getBodyCenterY(pose)
+        if (bodyY != null) {
+          if (baselineYRef.current == null) {
+            baselineYRef.current = bodyY
+          } else {
+            const baseline = baselineYRef.current
+            if (bodyY < baseline - JUMP_THRESHOLD) {
+              inAirRef.current = true
+            } else if (inAirRef.current && bodyY >= baseline - JUMP_THRESHOLD / 2) {
+              const now = Date.now()
+              if (now - lastLandTimeRef.current > LAND_DEBOUNCE_MS) {
+                inAirRef.current = false
+                lastLandTimeRef.current = now
+                jumpsRef.current += 1
+                setJumps(jumpsRef.current)
+                playSound('complete')
+              }
+            }
+          }
         }
-        if (isActiveRef.current) setTimeout(updateHands, 80)
-      }).catch(() => { if (isActiveRef.current) setTimeout(updateHands, 80) })
+        if (isActiveRef.current) setTimeout(updatePose, 100)
+      }).catch(() => { if (isActiveRef.current) setTimeout(updatePose, 100) })
     }
 
     const gameLoop = () => {
       if (!isActiveRef.current) return
-
       ensureCanvasSize()
       if (canvas.width === 0 || canvas.height === 0) {
         animationFrameRef.current = requestAnimationFrame(gameLoop)
         return
       }
-
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       if (video.videoWidth > 0 && video.videoHeight > 0) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
       }
-
-      const handPositions = handPositionsRef.current
-      const prev = previousHandPositionsRef.current
-
-      if (handPositions.leftWrist && handPositions.leftElbow && prev.leftWrist) {
-        if (isPunching(handPositions.leftWrist, handPositions.leftElbow, prev.leftWrist)) {
-          punchesRef.current += 1
-          setPunches(punchesRef.current)
-          playSound('complete')
-        }
-      }
-      if (handPositions.rightWrist && handPositions.rightElbow && prev.rightWrist) {
-        if (isPunching(handPositions.rightWrist, handPositions.rightElbow, prev.rightWrist)) {
-          punchesRef.current += 1
-          setPunches(punchesRef.current)
-          playSound('complete')
-        }
-      }
-
-      previousHandPositionsRef.current = {
-        leftWrist: handPositions.leftWrist,
-        rightWrist: handPositions.rightWrist,
-      }
-
-      if (handPositions.leftWrist) {
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.5)'
-        ctx.beginPath()
-        ctx.arc(handPositions.leftWrist.x, handPositions.leftWrist.y, 30, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      if (handPositions.rightWrist) {
-        ctx.fillStyle = 'rgba(0, 255, 0, 0.5)'
-        ctx.beginPath()
-        ctx.arc(handPositions.rightWrist.x, handPositions.rightWrist.y, 30, 0, Math.PI * 2)
-        ctx.fill()
-      }
-
       animationFrameRef.current = requestAnimationFrame(gameLoop)
     }
 
-    updateHands()
+    updatePose()
     gameLoop()
   }
 
   const handleStart = () => {
-    handPositionsRef.current = { leftWrist: null, rightWrist: null, leftElbow: null, rightElbow: null }
-    previousHandPositionsRef.current = { leftWrist: null, rightWrist: null }
-    punchesRef.current = 0
+    baselineYRef.current = null
+    inAirRef.current = false
+    lastLandTimeRef.current = 0
+    jumpsRef.current = 0
     setIsActive(true)
     setTimeRemaining(challenge.duration)
-    setPunches(0)
+    setJumps(0)
   }
 
   const handleComplete = () => {
     setIsActive(false)
-    const finalPunches = punchesRef.current
-    const score = Math.min(100, finalPunches * 5)
-    onComplete(score, finalPunches, 1)
+    onComplete(jumpsRef.current)
   }
 
   const cleanup = () => {
@@ -267,7 +235,7 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>🥊 {t('Boxing Challenge')}</h2>
+      <h2 className={styles.title}>⬆️ {t('Jumps')}</h2>
 
       <div className={styles.gameArea}>
         {cameraStatus === 'loading' && (
@@ -278,7 +246,7 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
 
         {isActive && (
           <div className={styles.gameOverlay}>
-            <div className={styles.punches}>👊 {punches}</div>
+            <div className={styles.punches}>⬆️ {jumps}</div>
             <div className={styles.timer}>0:{timeRemaining.toString().padStart(2, '0')}</div>
           </div>
         )}
@@ -290,13 +258,12 @@ export default function BoxingChallenge({ challenge, onComplete, onCancel }: Box
             🚀 {t('Start Challenge!')}
           </button>
         ) : (
-          <p className={styles.recordingHint}>{t('Throw punches! Every punch counts.')}</p>
+          <p className={styles.recordingHint}>{t('Jump in place! We count every jump.')}</p>
         )}
       </div>
 
       <div className={styles.instructions}>
-        <p>💡 {t('Throw punches at the camera!')}</p>
-        <p>{t('We count every punch you throw.')}</p>
+        <p>💡 {t('Jump in place as many times as you can!')}</p>
       </div>
     </div>
   )

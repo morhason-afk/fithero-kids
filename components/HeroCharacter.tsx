@@ -27,7 +27,7 @@ const HeroCharacter = forwardRef<HTMLDivElement, object>(function HeroCharacter(
               </div>
             </div>
             <h3 className={styles.heroName}>{displayName}</h3>
-            <p className={styles.heroSubtitle}>{t('Level')} {stats.level} • {t('Champion')}</p>
+            <p className={styles.heroSubtitle}>{t('Champion')}</p>
           </div>
         </div>
       </div>

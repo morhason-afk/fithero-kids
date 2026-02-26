@@ -128,10 +128,28 @@ export function isHandMoving(
   threshold: number = 10
 ): boolean {
   if (!wrist || !previousWrist) return false
-  
+
   const movement = Math.sqrt(
     Math.pow(wrist.x - previousWrist.x, 2) + Math.pow(wrist.y - previousWrist.y, 2)
   )
-  
+
   return movement > threshold
+}
+
+/** Get body center Y (for jump detection). In image coords, Y increases downward. */
+export function getBodyCenterY(
+  pose: poseDetection.Pose | null,
+  minScore: number = DEFAULT_MIN_SCORE
+): number | null {
+  if (!pose) return null
+  const keypoints = pose.keypoints
+  const nose = keypoints.find(kp => kp.name === 'nose')
+  const leftHip = keypoints.find(kp => kp.name === 'left_hip')
+  const rightHip = keypoints.find(kp => kp.name === 'right_hip')
+  const ys: number[] = []
+  if (nose && nose.score != null && nose.score > minScore) ys.push(nose.y)
+  if (leftHip && leftHip.score != null && leftHip.score > minScore) ys.push(leftHip.y)
+  if (rightHip && rightHip.score != null && rightHip.score > minScore) ys.push(rightHip.y)
+  if (ys.length === 0) return null
+  return ys.reduce((a, b) => a + b, 0) / ys.length
 }

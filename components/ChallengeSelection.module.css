@@ -1,14 +1,200 @@
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 8px 12px 24px;
+  padding: 0 8px 16px;
+  width: 100%;
+}
+
+/* ========== Reference-style trail: golden path + blue hexagons + shield badges ========== */
+.trailReference {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  max-height: 55vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+.trailReference::-webkit-scrollbar {
+  width: 5px;
+}
+
+.trailReference::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.4);
+  border-radius: 3px;
+}
+
+.trailPath {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  margin-left: -10px;
+  background: linear-gradient(90deg, #B45309 0%, #F59E0B 20%, #FDE68A 50%, #F59E0B 80%, #B45309 100%);
+  border: 2px solid #92400E;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(253, 230, 138, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  z-index: 0;
+}
+
+.trailNodes {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 8px 0 16px;
+  width: 100%;
+  max-width: 280px;
+}
+
+.trailRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sideSlot {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 72px;
+}
+
+.hexSlot {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hexNode {
+  width: 44px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #60A5FA 0%, #3B82F6 50%, #2563EB 100%);
+  border: 3px solid #93C5FD;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 2px 4px rgba(0, 0, 0, 0.2);
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.hexStart {
+  width: 48px;
+  height: 54px;
+  background: linear-gradient(180deg, #34D399 0%, #10B981 100%);
+  border-color: #6EE7B7;
+}
+
+.hexEnd {
+  background: linear-gradient(180deg, #F59E0B 0%, #D97706 100%);
+  border-color: #FCD34D;
+}
+
+.hexNumber {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  line-height: 1;
+}
+
+.sideBadge {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px 10px;
+  min-width: 64px;
+  border: 3px solid #E5E7EB;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #9CA3AF 0%, #6B7280 100%);
+  box-shadow: 0 2px 0 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.sideBadge:hover:not(:disabled),
+.sideBadge.sideBadgeHovered:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 3px 0 0 rgba(0, 0, 0, 0.2);
+}
+
+.sideBadge:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.sideBadgeLocked {
+  background: linear-gradient(180deg, #6B7280 0%, #4B5563 100%);
+}
+
+.sideBadgeStars {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #FCD34D;
+  line-height: 1;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+  order: -1;
+}
+
+.sideBadgeIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.sideBadgeLabel {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
+}
+
+.sideBadgeLockOverlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.sideBadgeLockText {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: white;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Unlocked badge: brighter */
+.sideBadge:not(.sideBadgeLocked) {
+  background: linear-gradient(180deg, #A78BFA 0%, #7C3AED 100%);
+  border-color: #C4B5FD;
 }
 
 .headerSection {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  display: none;
 }
 
 .title {
@@ -182,6 +368,16 @@
   background: var(--block-dirt, #8B5A2B);
   border: 1px solid var(--block-dirt-dark, #6B4423);
   border-radius: 2px;
+}
+
+/* Simple central trail line (golden, blocky) */
+.trailLineBlock {
+  width: 16px;
+  height: 12px;
+  background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 100%);
+  border: 2px solid #D97706;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
 .emptyTrackLeft {

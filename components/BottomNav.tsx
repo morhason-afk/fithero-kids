@@ -6,16 +6,12 @@ import styles from './BottomNav.module.css'
 interface BottomNavProps {
   onPlay: () => void
   onCharacter: () => void
-  onChallenges: () => void
-  onContactSupport: () => void
   onMore: () => void
 }
 
 export default function BottomNav({
   onPlay,
   onCharacter,
-  onChallenges,
-  onContactSupport,
   onMore,
 }: BottomNavProps) {
   const { t } = useLanguage()
@@ -25,39 +21,21 @@ export default function BottomNav({
       <div className={styles.nav}>
         <button
           type="button"
-          className={`${styles.item} ${styles.itemPrimary}`}
-          onClick={onPlay}
-          aria-label={t('Play')}
-        >
-          <span className={styles.itemIcon} aria-hidden>▶</span>
-          <span>{t('Play')}</span>
-        </button>
-        <button
-          type="button"
           className={styles.item}
           onClick={onCharacter}
-          aria-label={t('Customize')}
+          aria-label={t('Character')}
         >
           <span className={styles.itemIcon} aria-hidden>🧒</span>
           <span>{t('Character')}</span>
         </button>
         <button
           type="button"
-          className={styles.item}
-          onClick={onChallenges}
-          aria-label={t('Challenges')}
+          className={`${styles.item} ${styles.itemPrimary}`}
+          onClick={onPlay}
+          aria-label={t('Play')}
         >
-          <span className={styles.itemIcon} aria-hidden>⭐</span>
-          <span>{t('Challenges')}</span>
-        </button>
-        <button
-          type="button"
-          className={styles.item}
-          onClick={onContactSupport}
-          aria-label={t('Contact support')}
-        >
-          <span className={styles.itemIcon} aria-hidden>✉</span>
-          <span>{t('Contact support')}</span>
+          <span className={styles.itemIcon} aria-hidden>▶</span>
+          <span>{t('Play')}</span>
         </button>
         <button
           type="button"

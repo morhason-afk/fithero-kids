@@ -186,13 +186,30 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 16px 16px 24px;
+  gap: 16px;
+  padding: 12px 16px 24px;
 }
+
+.taglineCopy {
+  margin: 0;
+  padding: 8px 0 4px;
+  font-family: 'Fredoka', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--foreground);
+  text-align: center;
+  max-width: 100%;
+}
+
 @media (max-width: 768px) {
   .contentWrap {
-    padding: 12px 12px 20px;
-    gap: 20px;
+    padding: 10px 12px 20px;
+    gap: 14px;
+  }
+  .taglineCopy {
+    font-size: 0.875rem;
+    padding: 6px 0 2px;
   }
 }
 
@@ -201,14 +218,12 @@
   top: 0;
   z-index: 50;
   width: 100%;
-  min-height: 64px;
+  min-height: 56px;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 3px solid rgba(255, 107, 53, 0.35);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: var(--muted);
+  border-bottom: 3px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .headerInner {
@@ -229,8 +244,9 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .headerAvatar {
@@ -251,45 +267,12 @@
   line-height: 1;
 }
 
-.headerLevelBlock {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  min-width: 0;
-}
-.headerLevelText {
-  font-family: 'Fredoka', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--background);
-  line-height: 1;
-}
-.headerLevelBar {
-  height: 6px;
-  width: 72px;
-  border-radius: 9999px;
-  background: rgba(0, 0, 0, 0.12);
-  overflow: hidden;
-}
-.headerLevelBarFill {
-  height: 100%;
-  border-radius: 9999px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-  transition: width 0.3s ease;
-}
-
 .logoContainer {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 10px;
-}
-@media (max-width: 600px) {
-  .logoContainer .logoText,
-  .logoContainer .servedBy {
-    display: none;
-  }
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .logoMark {
@@ -301,8 +284,8 @@
 }
 
 .logoKiteSvg {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   flex-shrink: 0;
   display: block;
   pointer-events: none;
@@ -310,7 +293,7 @@
 
 .logoWordmark {
   font-family: 'Fredoka', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: 0.02em;
@@ -417,25 +400,52 @@
   color: var(--primary-foreground);
 }
 
-.goalRow {
+.mainRow {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
   width: 100%;
+  min-height: 0;
 }
 
-.heroBox {
+.heroColumn {
   flex-shrink: 0;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+}
+
+.trailColumn {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+@media (max-width: 480px) {
+  .mainRow {
+    flex-direction: column;
+    align-items: center;
+  }
+  .heroColumn {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.goalRow {
   width: 100%;
-  padding: 0;
 }
 
 .contentSection {
   width: 100%;
 }
 
-/* Challenges section: lower on page, minimal gap above trees */
 .challengesSection {
   width: 100%;
-  margin-top: 12px;
-  padding-bottom: 18px;
 }
 
 /* Bottom nav (Phase 2) */

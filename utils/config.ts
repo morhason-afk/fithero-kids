@@ -5,7 +5,6 @@ const CONFIG_STORAGE_KEY = 'exercise-game-admin-config'
 const DEFAULT_MIN_STARS = 2
 const DEFAULT_SUBSCRIPTION_USD = 4.99
 const DEFAULT_SUPPORT_EMAIL = 'support@example.com'
-const DEFAULT_EXPERIENCE_PER_LEVEL = 20
 const DEFAULT_XP_PER_CUSTOMIZATION = 1
 const DEFAULT_XP_PER_CHALLENGE_MAX = 15
 
@@ -17,7 +16,6 @@ export function getDefaultConfig(): AdminConfig {
     minStarsToUnlockByChallengeId: {},
     subscriptionMonthlyPriceUsd: DEFAULT_SUBSCRIPTION_USD,
     supportEmail: DEFAULT_SUPPORT_EMAIL,
-    experiencePerLevel: DEFAULT_EXPERIENCE_PER_LEVEL,
     xpPerCustomization: DEFAULT_XP_PER_CUSTOMIZATION,
     xpPerChallengeMax: DEFAULT_XP_PER_CHALLENGE_MAX,
   }
@@ -58,13 +56,10 @@ export function getConfig(): AdminConfig {
       subscriptionMonthlyPriceUsd: typeof parsed.subscriptionMonthlyPriceUsd === 'number'
         ? clampSubscriptionUsd(parsed.subscriptionMonthlyPriceUsd)
         : defaultConfig.subscriptionMonthlyPriceUsd,
-      supportEmail: typeof parsed.supportEmail === 'string' && parsed.supportEmail.trim().length > 0
+    supportEmail: typeof parsed.supportEmail === 'string' && parsed.supportEmail.trim().length > 0
         ? parsed.supportEmail.trim()
         : defaultConfig.supportEmail,
-      experiencePerLevel: typeof parsed.experiencePerLevel === 'number' && parsed.experiencePerLevel >= 1
-        ? Math.round(parsed.experiencePerLevel)
-        : defaultConfig.experiencePerLevel,
-      xpPerCustomization: typeof parsed.xpPerCustomization === 'number' && parsed.xpPerCustomization >= 0
+    xpPerCustomization: typeof parsed.xpPerCustomization === 'number' && parsed.xpPerCustomization >= 0
         ? Math.round(parsed.xpPerCustomization)
         : defaultConfig.xpPerCustomization,
       xpPerChallengeMax: typeof parsed.xpPerChallengeMax === 'number' && parsed.xpPerChallengeMax >= 0
