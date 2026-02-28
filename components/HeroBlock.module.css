@@ -14,6 +14,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  cursor: pointer;
   background: var(--muted);
   border: 3px solid var(--border);
   box-shadow:
@@ -75,4 +76,15 @@
 
 .nameEditBtn:hover {
   background: rgba(255, 255, 255, 0.25);
+}
+
+/* Hidden div for Share capture when character is not on main screen */
+.shareCaptureOnly {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 200px;
+  height: 300px;
+  overflow: hidden;
+  pointer-events: none;
 }

@@ -199,6 +199,13 @@ export const TRANSLATIONS_HE: Record<string, string> = {
 
   // Share button
   'Share my character image and message on WhatsApp': 'שיתוף תמונת הדמות וההודעה שלי ב־WhatsApp',
+  'Play too': 'גם אתם מוזמנים לשחק',
+  'Share with video': 'שיתוף עם וידאו',
+  'Share (text only)': 'שיתוף (טקסט בלבד)',
+  'Share on WhatsApp': 'שיתוף ב־WhatsApp',
+  'Share with video on WhatsApp': 'שיתוף עם וידאו ב־WhatsApp',
+  'Share text only on WhatsApp': 'שיתוף טקסט בלבד ב־WhatsApp',
+  'Share my character image': 'שיתוף תמונת הדמות שלי',
 }
 
 /** Get Hebrew translation for an English string; returns English if no translation. */

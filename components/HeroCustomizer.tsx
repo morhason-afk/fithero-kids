@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { toPng } from 'html-to-image'
 import { useHero } from '@/contexts/HeroContext'
 import { useConfig } from '@/contexts/ConfigContext'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -18,7 +19,7 @@ import {
   type FaceExpressionOption,
 } from '@/data/characterOptions'
 import { heroRequiresSubscription } from '@/utils/subscription'
-import HeroCharacter from './HeroCharacter'
+import ScalableCharacter from './ScalableCharacter'
 import styles from './HeroCustomizer.module.css'
 
 export type CustomizerSection = 'character'
@@ -27,9 +28,10 @@ interface HeroCustomizerProps {
   isOpen: boolean
   onClose: () => void
   initialSection?: CustomizerSection
+  onEditName?: () => void
 }
 
-export default function HeroCustomizer({ isOpen, onClose, initialSection = 'character' }: HeroCustomizerProps) {
+export default function HeroCustomizer({ isOpen, onClose, initialSection = 'character', onEditName }: HeroCustomizerProps) {
   const { hero, updateCosmetics, addXp, spendCoins, addOwnedItem, isItemOwned } = useHero()
   const { config } = useConfig()
   const { t } = useLanguage()
@@ -37,6 +39,8 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
   const xpPerCustomization = typeof config.xpPerCustomization === 'number' && config.xpPerCustomization >= 0 ? config.xpPerCustomization : 1
   const [activeTab, setActiveTab] = useState<CustomizerSection>(initialSection)
   const [mounted, setMounted] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const previewRef = useRef<HTMLDivElement>(null)
   useEffect(() => setMounted(true), [])
 
   useEffect(() => {
@@ -161,6 +165,47 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isOpen, onClose])
 
+  const getShareText = useCallback(() => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    return `Check out my FitHero Kids character! 🦸 #FitHeroKids\n\n${t('Play too')}: ${url}`
+  }, [t])
+
+  const handleShare = useCallback(async () => {
+    if (sharing || !previewRef.current) return
+    setSharing(true)
+    trackEvent('share_customizer', {})
+    const text = getShareText()
+    try {
+      const dataUrl = await toPng(previewRef.current, {
+        cacheBust: true,
+        backgroundColor: 'transparent',
+        pixelRatio: 2,
+        style: { margin: '0' },
+      })
+      const blob = await fetch(dataUrl).then((r) => r.blob())
+      const file = new File([blob], 'my-fithero-character.png', { type: 'image/png' })
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          await navigator.share({
+            files: [file],
+            text,
+            title: 'FitHero Kids – My character',
+          })
+        } catch (shareErr) {
+          if ((shareErr as Error)?.name !== 'AbortError') {
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
+          }
+        }
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
+      }
+    } catch {
+      window.open(`https://wa.me/?text=${encodeURIComponent(getShareText())}`, '_blank', 'noopener,noreferrer')
+    } finally {
+      setSharing(false)
+    }
+  }, [sharing, getShareText])
+
   const modalContent = !isOpen ? null : (
     <>
       <div className={styles.overlay} onClick={onClose} aria-label="Close"></div>
@@ -176,8 +221,24 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
           </button>
         </div>
 
-        <div className={styles.preview}>
-          <HeroCharacter />
+        <div ref={previewRef} className={styles.preview}>
+          <div className={styles.previewCharacter}>
+            <ScalableCharacter />
+          </div>
+          <button
+            type="button"
+            className={styles.shareCustomizerBtn}
+            onClick={handleShare}
+            disabled={sharing}
+            aria-label={t('Share my character image')}
+          >
+            📤 {sharing ? t('Preparing…') : t('Share')}
+          </button>
+          {onEditName && (
+            <button type="button" className={styles.editNameBtn} onClick={() => { onEditName(); onClose(); }} aria-label={t('Edit hero name')}>
+              ✏️ {t('Edit name')}
+            </button>
+          )}
         </div>
 
         <p className={styles.subscriptionHint}>

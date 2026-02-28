@@ -138,9 +138,6 @@ function HomeContent() {
           </div>
 
           <div id="challenges" className={styles.mainRow}>
-            <div className={styles.heroColumn}>
-              <HeroBlock ref={heroBlockRef} />
-            </div>
             <div className={styles.trailColumn}>
               {showSelection && (
                 <ChallengeSelection onSelectChallenge={handleChallengeSelect} />
@@ -155,6 +152,8 @@ function HomeContent() {
           </div>
         </div>
       </div>
+
+      <HeroBlock ref={heroBlockRef} showOnMainScreen={false} />
 
       <div className={styles.bottomNavWrap}>
         <BottomNav

@@ -130,10 +130,75 @@
 }
 
 .preview {
-  padding: 32px;
+  padding: 24px 32px;
   background: linear-gradient(135deg, #06B6D4 0%, #8B5CF6 50%, #EC4899 100%);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+}
+
+/* Full character from head to toe - aspect 120:200 */
+.previewCharacter {
+  width: 100%;
+  max-width: 120px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.previewCharacter svg {
+  width: auto;
+  height: 100%;
+  object-fit: contain;
+}
+
+.shareCustomizerBtn {
+  position: absolute;
+  bottom: 12px;
+  left: 16px;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: #25D366;
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.shareCustomizerBtn:hover:not(:disabled) {
+  background: #20BD5A;
+  transform: translateY(-1px);
+}
+
+.shareCustomizerBtn:disabled {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.editNameBtn {
+  position: absolute;
+  bottom: 12px;
+  right: 16px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editNameBtn:hover {
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .preview::before {

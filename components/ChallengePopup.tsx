@@ -218,6 +218,7 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
           <ResultDisplay
             result={result}
             challenge={challenge}
+            videoBlob={videoBlob}
             onClose={handleClose}
           />
         )}

@@ -1,5 +1,5 @@
 export interface AnalyticsEvent {
-  type: 'challenge_completed' | 'purchase'
+  type: 'challenge_completed' | 'purchase' | 'share_customizer'
   timestamp: number // Unix timestamp in milliseconds
   userId: string // Unique user identifier (from hero stats or generated)
   data?: {

@@ -10,13 +10,17 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { getStarEmoji, getResultTitle, shouldCelebrate, getXpFromChallengeStars } from '@/utils/scoring'
 import styles from './ResultDisplay.module.css'
 
+const APP_NAME = 'FitHero Kids'
+const SHARE_HASHTAG = '#FitHeroKids'
+
 interface ResultDisplayProps {
   result: ExerciseResult
   challenge: Challenge
+  videoBlob?: Blob | null
   onClose: () => void
 }
 
-export default function ResultDisplay({ result, challenge, onClose }: ResultDisplayProps) {
+export default function ResultDisplay({ result, challenge, videoBlob, onClose }: ResultDisplayProps) {
   const { addCoins, addXp } = useHero()
   const { updateProgress } = useGame()
   const { addStars } = useWeeklyGoal()
@@ -77,6 +81,47 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
   const titleKey = result.stars >= 3 ? 'Amazing!' : result.stars === 2 ? 'Great job!' : 'Try again'
   const title = t(titleKey)
   const celebrate = shouldCelebrate(result.stars)
+  const hasVideo = !!videoBlob
+
+  const getShareText = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    return `I just completed ${t(challenge.title)} in ${APP_NAME}! ⭐${result.stars} 💎+${result.coins} ${SHARE_HASHTAG}\n\n${t('Play too')}: ${url}`
+  }
+
+  const shareToWhatsApp = (text: string) => {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer')
+  }
+
+  const handleShareWithoutVideo = () => {
+    shareToWhatsApp(getShareText())
+  }
+
+  const handleShareWithVideo = async () => {
+    if (!videoBlob) {
+      handleShareWithoutVideo()
+      return
+    }
+    const text = getShareText()
+    try {
+      const ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm'
+      const mimeType = videoBlob.type || 'video/webm'
+      const file = new File([videoBlob], `fithero-challenge.${ext}`, { type: mimeType })
+
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({
+          files: [file],
+          text,
+          title: `${APP_NAME} – Challenge`,
+        })
+        return
+      }
+    } catch (err) {
+      if ((err as Error)?.name === 'AbortError') return
+      shareToWhatsApp(text)
+      return
+    }
+    shareToWhatsApp(text)
+  }
 
   return (
     <div className={styles.container}>
@@ -127,6 +172,39 @@ export default function ResultDisplay({ result, challenge, onClose }: ResultDisp
             🏆 {t('NEW PERSONAL BEST!')}
           </div>
         )}
+
+        {/* Share options */}
+        <div className={styles.shareRow}>
+          {hasVideo ? (
+            <>
+              <button
+                type="button"
+                className={styles.shareButton}
+                onClick={handleShareWithVideo}
+                aria-label={t('Share with video on WhatsApp')}
+              >
+                📹 {t('Share with video')}
+              </button>
+              <button
+                type="button"
+                className={styles.shareButtonSecondary}
+                onClick={handleShareWithoutVideo}
+                aria-label={t('Share text only on WhatsApp')}
+              >
+                📤 {t('Share (text only)')}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className={styles.shareButton}
+              onClick={handleShareWithoutVideo}
+              aria-label={t('Share on WhatsApp')}
+            >
+              📤 {t('Share on WhatsApp')}
+            </button>
+          )}
+        </div>
 
         {/* Actions */}
         <div className={styles.actions}>
