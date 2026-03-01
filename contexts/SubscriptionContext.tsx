@@ -17,18 +17,21 @@ interface SubscriptionContextType {
 
 const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined)
 
+/** When false, subscription is disabled: all content is open or purchasable with diamonds; no prompts. */
+const SUBSCRIPTION_ENABLED = false
+
 export function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const [hasSubscription, setState] = useState(false)
+  const [hasSubscription, setState] = useState(!SUBSCRIPTION_ENABLED)
   const [modalReason, setModalReason] = useState<SubscriptionReason | null>(null)
 
-  // Subscription is not persisted: after every refresh the app behaves as if the user has no subscription.
+  // When SUBSCRIPTION_ENABLED is false, hasSubscription is true so no gates apply. Logic remains for when we re-enable.
 
   const setHasSubscription = (value: boolean) => {
     setState(value)
   }
 
   const showSubscriptionMessage = (reason: SubscriptionReason) => {
-    setModalReason(reason)
+    if (SUBSCRIPTION_ENABLED) setModalReason(reason)
   }
 
   const modalEl = modalReason ? (

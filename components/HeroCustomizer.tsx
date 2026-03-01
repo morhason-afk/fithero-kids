@@ -19,6 +19,7 @@ import {
   type FaceExpressionOption,
 } from '@/data/characterOptions'
 import { heroRequiresSubscription } from '@/utils/subscription'
+import { getStoredHeroName } from './HeroNameEditor'
 import ScalableCharacter from './ScalableCharacter'
 import styles from './HeroCustomizer.module.css'
 
@@ -235,14 +236,17 @@ export default function HeroCustomizer({ isOpen, onClose, initialSection = 'char
             📤 {sharing ? t('Preparing…') : t('Share')}
           </button>
           {onEditName && (
-            <button type="button" className={styles.editNameBtn} onClick={() => { onEditName(); onClose(); }} aria-label={t('Edit hero name')}>
-              ✏️ {t('Edit name')}
-            </button>
+            <div className={styles.nameEditBlock}>
+              <span className={styles.previewHeroName}>{getStoredHeroName()}</span>
+              <button type="button" className={styles.editNameBtn} onClick={() => { onEditName(); onClose(); }} aria-label={t('Edit hero name')}>
+                ✏️ {t('Edit name')}
+              </button>
+            </div>
           )}
         </div>
 
         <p className={styles.subscriptionHint}>
-          {t('First 5 in each category (skin, outfit, accessories) free or for diamonds • Rest require subscription')}
+          {t('First 5 in each category free or for diamonds • Rest unlock with diamonds')}
         </p>
 
         <div className={styles.options}>

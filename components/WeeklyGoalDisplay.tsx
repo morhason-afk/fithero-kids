@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useWeeklyGoal } from '@/contexts/WeeklyGoalContext'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { getStoredHeroName } from './HeroNameEditor'
 import WeeklyGoalSettings from './WeeklyGoalSettings'
 import styles from './WeeklyGoalDisplay.module.css'
 
@@ -15,6 +16,7 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
   const { goal, progress } = useWeeklyGoal()
   const { t } = useLanguage()
   const [showSettings, setShowSettings] = useState(false)
+  const heroName = getStoredHeroName()
   
   const progressPercent = Math.min(100, (progress.starsEarned / goal.starsRequired) * 100)
 
@@ -35,7 +37,7 @@ export default function WeeklyGoalDisplay({ showRewardCard = true }: WeeklyGoalD
           <div className={styles.goalCardBg}></div>
           <div className={styles.goalCardContent}>
             <div className={styles.goalHeader}>
-              <h3 className={styles.goalTitle}>{t('Weekly Goal')}</h3>
+              <h3 className={styles.goalTitle}>{heroName ? `${heroName}, ${t('your weekly goal')}` : t('Weekly Goal')}</h3>
               <button 
                 className={styles.editButton}
                 onClick={() => setShowSettings(true)}

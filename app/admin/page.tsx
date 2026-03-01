@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { AdminConfig } from '@/types/config'
 import { getConfig, setConfig, getDefaultConfig } from '@/utils/config'
 import { ALL_CHALLENGES } from '@/data/challenges'
-import { SUBSCRIPTION_STORAGE_KEY } from '@/contexts/SubscriptionContext'
 import styles from './admin.module.css'
+
+const SUBSCRIPTION_STORAGE_KEY = 'exercise-game-subscription'
 
 function seedConfigFromChallenges(): AdminConfig {
   const current = getConfig()
@@ -35,11 +36,22 @@ export default function AdminPage() {
 
   useEffect(() => {
     const loaded = getConfig()
-    if (loaded.challengeOrder.length === 0 && loaded.challengeDurations && Object.keys(loaded.challengeDurations).length === 0) {
-      setConfigState(seedConfigFromChallenges())
-    } else {
-      setConfigState(loaded)
+    const sortedAll = [...ALL_CHALLENGES].sort((a, b) => a.order - b.order)
+    const allIds = sortedAll.map(c => c.id)
+    let configToUse = loaded
+    if (loaded.challengeOrder.length === 0 && (!loaded.challengeDurations || Object.keys(loaded.challengeDurations).length === 0)) {
+      configToUse = seedConfigFromChallenges()
+    } else if (loaded.challengeOrder.length < allIds.length) {
+      const seen = new Set(loaded.challengeOrder)
+      const missing = allIds.filter(id => !seen.has(id))
+      const challengeOrder = [...loaded.challengeOrder, ...missing]
+      const challengeDurations = { ...loaded.challengeDurations }
+      sortedAll.forEach(c => {
+        if (challengeDurations[c.id] == null) challengeDurations[c.id] = c.duration
+      })
+      configToUse = { ...loaded, challengeOrder, challengeDurations }
     }
+    setConfigState(configToUse)
     try {
       setHasSubscription(localStorage.getItem(SUBSCRIPTION_STORAGE_KEY) === 'true')
     } catch {
@@ -138,9 +150,12 @@ export default function AdminPage() {
     )
   }
 
-  const challengeOrder = config.challengeOrder.length > 0
-    ? config.challengeOrder
-    : [...ALL_CHALLENGES].sort((a, b) => a.order - b.order).map(c => c.id)
+  const sortedAll = [...ALL_CHALLENGES].sort((a, b) => a.order - b.order)
+  const allIds = sortedAll.map(c => c.id)
+  const existingOrder = config.challengeOrder.length > 0 ? config.challengeOrder : allIds
+  const seen = new Set(existingOrder)
+  const missing = allIds.filter(id => !seen.has(id))
+  const challengeOrder = existingOrder.length >= allIds.length ? existingOrder : [...existingOrder, ...missing]
   const byId = new Map(ALL_CHALLENGES.map(c => [c.id, c]))
 
   return (
