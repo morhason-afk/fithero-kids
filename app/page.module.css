@@ -7,12 +7,14 @@
   max-width: 1024px;
   margin: 0 auto;
   position: relative;
+  /* Ensure creative sky always shows (no white flash) */
+  background: linear-gradient(180deg, #7DD3FC 0%, #BAE6FD 100%);
 }
 
 /* Sky background (Minecraft-style clear blue) - explicit fallback so creative always shows */
 .skyWrap {
   flex: 1;
-  min-height: 100vh;
+  min-height: min(100vh, 100dvh);
   background: linear-gradient(180deg, #7DD3FC 0%, #BAE6FD 100%);
   background: var(--gradient-sky, linear-gradient(180deg, #7DD3FC 0%, #BAE6FD 100%));
   position: relative;
@@ -224,11 +226,13 @@
   z-index: 50;
   width: 100%;
   min-height: 56px;
+  max-height: 72px;
   display: flex;
   align-items: center;
-  background: var(--muted);
-  border-bottom: 3px solid var(--border);
+  background: var(--muted, #0F3460);
+  border-bottom: 3px solid var(--border, #233554);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  flex-shrink: 0;
 }
 
 .headerInner {
@@ -252,6 +256,25 @@
   gap: 8px;
   flex-wrap: nowrap;
   width: 100%;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.headerLeft .langToggle {
+  flex-shrink: 0;
+}
+
+.headerLeft .langBtn {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
 }
 
 .headerAvatar {
@@ -278,6 +301,8 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: 50%;
 }
 
 .logoMark {
@@ -291,9 +316,12 @@
 .logoKiteSvg {
   width: 40px;
   height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   flex-shrink: 0;
   display: block;
   pointer-events: none;
+  object-fit: contain;
 }
 
 .logoWordmark {

@@ -269,7 +269,7 @@ export default function AdminPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>Challenge order, duration & unlock stars</h2>
-          <p className={styles.hint}>Reorder with ↑/↓. Duration in seconds (5–60). Min stars: stars required on the previous challenge to unlock this one (0–3).</p>
+          <p className={styles.hint}>Reorder with ↑/↓. Duration in seconds (5–60). Min stars: minimum stars on the previous challenge to unlock this one—e.g. 2 means 2 or more (0–3).</p>
           <ul className={styles.list}>
             {challengeOrder.map((id, index) => {
               const challenge = byId.get(id)

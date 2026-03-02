@@ -27,7 +27,7 @@ function HomeContent() {
   const { challenges, config } = useConfig()
   const { challengeProgress } = useGame()
   const { hasSubscription } = useSubscription()
-  const { t } = useLanguage()
+  const { t, language, setLanguage } = useLanguage()
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null)
   const [showSelection, setShowSelection] = useState(true)
   const [showSupport, setShowSupport] = useState(false)
@@ -38,10 +38,12 @@ function HomeContent() {
     config.minStarsToUnlockByChallengeId[c.id] ?? c.unlockRequirement?.minStars ?? 2
   const sortedChallenges = [...challenges].sort((a, b) => a.order - b.order)
 
+  /** Last unlocked challenge in trail order (furthest you can play). Used when user taps PLAY. */
   const getLastUnlockedChallenge = (): Challenge | null => {
     for (let i = sortedChallenges.length - 1; i >= 0; i--) {
       const ch = sortedChallenges[i]
-      const unlocked = isChallengeUnlocked(ch, challengeProgress, getMinStarsToUnlock(ch))
+      const prevInTrail = sortedChallenges[i - 1]
+      const unlocked = isChallengeUnlocked(ch, challengeProgress, getMinStarsToUnlock(ch), prevInTrail?.id)
       const subLocked = challengeRequiresSubscription(i) && !hasSubscription
       if (unlocked && !subLocked) return ch
     }
@@ -60,10 +62,11 @@ function HomeContent() {
 
   const heroBlockRef = useRef<HeroBlockRef>(null)
 
+  /** OPEN last unlocked challenge (furthest in trail) when user taps PLAY. */
   const handlePlayNow = () => {
-    const last = getLastUnlockedChallenge()
-    if (last) {
-      setSelectedChallenge(last)
+    const lastUnlocked = getLastUnlockedChallenge()
+    if (lastUnlocked) {
+      setSelectedChallenge(lastUnlocked)
       setShowSelection(false)
     } else {
       document.getElementById('challenges')?.scrollIntoView({ behavior: 'smooth' })
@@ -110,7 +113,29 @@ function HomeContent() {
         <header className={styles.pageHeader}>
           <div className={styles.headerInner}>
             <div className={styles.headerRow}>
-              <BalanceBar />
+              <div className={styles.headerLeft}>
+                <BalanceBar />
+                <div className={styles.langToggle} role="group" aria-label={t('Language')}>
+                  <button
+                    type="button"
+                    className={`${styles.langBtn} ${language === 'en' ? styles.langBtnActive : ''}`}
+                    onClick={() => setLanguage('en')}
+                    aria-pressed={language === 'en'}
+                    title="English"
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    className={`${styles.langBtn} ${language === 'he' ? styles.langBtnActive : ''}`}
+                    onClick={() => setLanguage('he')}
+                    aria-pressed={language === 'he'}
+                    title="עברית"
+                  >
+                    HE
+                  </button>
+                </div>
+              </div>
               <div className={styles.logoContainer}>
                 <div className={styles.logoMark} aria-hidden>
                   <svg className={styles.logoKiteSvg} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>

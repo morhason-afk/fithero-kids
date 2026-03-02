@@ -68,12 +68,27 @@ Resend free tier includes:
 - 100 emails per day
 - Perfect for testing and small projects!
 
-## Production Deployment
+## Production Deployment (Netlify)
 
-When deploying to Vercel/Netlify:
-1. Go to your project settings
-2. Add environment variable: `RESEND_API_KEY`
-3. Paste your API key value
-4. Redeploy
+For **weekly goal completion emails** (and support emails) to work in production on Netlify:
+
+1. In **Netlify**: open your site → **Site configuration** (or **Site settings**) → **Environment variables**.
+2. Click **Add a variable** / **Add environment variable**.
+3. Add:
+   - **Key:** `RESEND_API_KEY`  
+     **Value:** your Resend API key (e.g. `re_...`)
+   - (Optional) **Key:** `RESEND_FROM_EMAIL`  
+     **Value:** e.g. `FitHero Kids <onboarding@resend.dev>` or your verified domain address
+4. Set **Scopes** to **Production** (and optionally **Deploy previews** if you want email there too).
+5. **Trigger a new deploy** (e.g. **Deploys** → **Trigger deploy** → **Deploy site**) so the new variables are applied.
+
+If emails still don’t send, check the browser’s Network tab when the weekly goal completes: the request to `/api/send-email` should go to your production URL. A 503 response usually means `RESEND_API_KEY` is missing or not available in the production environment.
+
+## Production Deployment (Vercel)
+
+When deploying to Vercel:
+1. Go to your project → **Settings** → **Environment Variables**
+2. Add `RESEND_API_KEY` (and optionally `RESEND_FROM_EMAIL`)
+3. Redeploy
 
 **Important**: Never commit `.env.local` to git - it's already in `.gitignore`

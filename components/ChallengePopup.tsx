@@ -9,6 +9,7 @@ import ExerciseVerifier from './ExerciseVerifier'
 import ResultDisplay from './ResultDisplay'
 import BoxingChallenge from './BoxingChallenge'
 import JumpsChallenge from './JumpsChallenge'
+import MatchItChallenge from './MatchItChallenge'
 import { calculateStarsFromCompliance, calculateCoinsFromStars } from '@/utils/scoring'
 import { trackEvent } from '@/utils/analytics'
 import styles from './ChallengePopup.module.css'
@@ -121,11 +122,30 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
     trackEvent('challenge_completed', { challengeId: challenge.id })
   }
 
+  const handleMatchItComplete = (score: number) => {
+    const stars = score >= 90 ? 3 : score >= 60 ? 2 : score >= 30 ? 1 : 0
+    const coins = calculateCoinsFromStars(stars)
+    const feedback =
+      stars >= 3
+        ? t('Amazing! You matched the shape! 🌟')
+        : stars === 2
+          ? t('Great job matching the shape! 👏')
+          : stars === 1
+            ? t('You matched the shape! Try again for more stars! 💪')
+            : t('Keep practicing! Match the shape with your body. 🔷')
+    setResult({ score, stars, coins, feedback })
+    setState('result')
+    trackEvent('challenge_completed', { challengeId: challenge.id })
+  }
+
   const handleClose = () => {
     onComplete()
   }
 
-  const isInteractiveChallenge = challenge.exerciseType === 'boxing' || challenge.exerciseType === 'jumps'
+  const isInteractiveChallenge =
+    challenge.exerciseType === 'boxing' ||
+    challenge.exerciseType === 'jumps' ||
+    challenge.exerciseType === 'match-it'
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
@@ -158,7 +178,9 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
                     ? t('Throw as many punches as you can')
                     : challenge.exerciseType === 'jumps'
                       ? t('Jump in place as many times as you can')
-                      : t('Complete challenge')}
+                      : challenge.exerciseType === 'match-it'
+                        ? t('Match the shape on screen with your body')
+                        : t('Complete challenge')}
                 </span>
               </div>
               <div className={styles.infoItem} style={{ background: '#FEF3C7' }}>
@@ -194,6 +216,14 @@ export default function ChallengePopup({ challenge, onComplete }: ChallengePopup
           <JumpsChallenge
             challenge={challenge}
             onComplete={handleJumpsComplete}
+            onCancel={() => setState('challenge')}
+          />
+        )}
+
+        {state === 'camera' && challenge.exerciseType === 'match-it' && (
+          <MatchItChallenge
+            challenge={challenge}
+            onComplete={handleMatchItComplete}
             onCancel={() => setState('challenge')}
           />
         )}

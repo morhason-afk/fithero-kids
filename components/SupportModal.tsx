@@ -44,7 +44,8 @@ export default function SupportModal({ supportEmail, onClose }: SupportModalProp
 
     try {
       setSubmitting(true)
-      const res = await fetch('/api/send-email', {
+      const apiUrl = typeof window !== 'undefined' ? `${window.location.origin}/api/send-email` : '/api/send-email'
+      const res = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

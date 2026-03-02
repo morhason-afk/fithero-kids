@@ -39,14 +39,31 @@ export function addStarsToWeeklyProgress(
   }
 }
 
-export async function sendNotification(goal: WeeklyGoal, childName: string = 'Your child') {
-  const message = `${childName} completed their weekly goal! They earned ${goal.starsRequired} stars and deserve ${goal.giftDescription}! 🎉`
+const HERO_NAME_STORAGE_KEY = 'fithero-hero-name'
+
+function getChildNameFromStorage(): string {
+  if (typeof window === 'undefined') return 'Your child'
+  try {
+    const s = localStorage.getItem(HERO_NAME_STORAGE_KEY)
+    if (s && s.trim()) return s.trim().slice(0, 20)
+  } catch (_) {}
+  return 'Your child'
+}
+
+export async function sendNotification(goal: WeeklyGoal, childName?: string) {
+  const name = childName ?? getChildNameFromStorage()
+  const message = `${name} completed their weekly goal! They earned ${goal.starsRequired} stars and deserve ${goal.giftDescription}! 🎉`
 
   switch (goal.notificationMethod) {
     case 'email':
       if (goal.notificationContact) {
         try {
-          const response = await fetch('/api/send-email', {
+          // Use absolute URL so production (e.g. Netlify) always hits the correct host
+          const apiUrl =
+            typeof window !== 'undefined'
+              ? `${window.location.origin}/api/send-email`
+              : '/api/send-email'
+          const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -62,16 +79,19 @@ export async function sendNotification(goal: WeeklyGoal, childName: string = 'Yo
 
           if (response.ok) {
             console.log('✅ Email sent successfully:', result)
-            // Show success message to user
             if (typeof window !== 'undefined') {
               alert(`✅ Email notification sent to ${goal.notificationContact}!`)
             }
           } else {
-            console.error('❌ Failed to send email:', result.error)
-            // Fallback to mailto if API fails
+            const errMsg = result?.error || result?.details || `HTTP ${response.status}`
+            console.error('❌ Failed to send email:', errMsg)
             if (typeof window !== 'undefined') {
+              const hint =
+                response.status === 503
+                  ? '\n\nTip: On Netlify, add RESEND_API_KEY (and optionally RESEND_FROM_EMAIL) in Site settings → Environment variables.'
+                  : ''
               const useMailto = confirm(
-                `Failed to send email automatically: ${result.error}\n\nWould you like to open your email client instead?`
+                `Failed to send email: ${errMsg}${hint}\n\nWould you like to open your email client instead?`
               )
               if (useMailto) {
                 window.open(`mailto:${goal.notificationContact}?subject=Weekly Goal Completed!&body=${encodeURIComponent(message)}`)
@@ -79,11 +99,11 @@ export async function sendNotification(goal: WeeklyGoal, childName: string = 'Yo
             }
           }
         } catch (error) {
+          const errMsg = error instanceof Error ? error.message : 'Unknown error'
           console.error('❌ Error sending email:', error)
-          // Fallback to mailto on error
           if (typeof window !== 'undefined') {
             const useMailto = confirm(
-              `Error sending email: ${error instanceof Error ? error.message : 'Unknown error'}\n\nWould you like to open your email client instead?`
+              `Could not reach the email server: ${errMsg}\n\nWould you like to open your email client instead?`
             )
             if (useMailto) {
               window.open(`mailto:${goal.notificationContact}?subject=Weekly Goal Completed!&body=${encodeURIComponent(message)}`)

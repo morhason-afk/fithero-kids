@@ -199,6 +199,21 @@ export const TRANSLATIONS_HE: Record<string, string> = {
   'Move your arms up and down quickly': 'הזיזו את הידיים למעלה ולמטה במהירות.',
   'Try to hit as many as you can!': 'נסו לפגוע בכמה שיותר!',
 
+  // Match it! challenge
+  'Match the shape on screen with your body': 'התאימו את הצורה על המסך עם הגוף שלכם',
+  'Match this shape!': 'התאימו את הצורה הזו!',
+  'Arms out like T': 'ידיים לצדדים כמו T',
+  'Arms up like Y': 'ידיים למעלה כמו Y',
+  'Big X with arms and legs': 'איקס גדול עם ידיים ורגליים',
+  'Star pose': 'תנוחת כוכב',
+  'Hold a big circle': 'החזיקו עיגול גדול',
+  'Use your body to match the shape!': 'השתמשו בגוף כדי להתאים לצורה!',
+  'Look at the shape on screen. Use your arms and body to make the same shape!': 'הביטו בצורה על המסך. השתמשו בידיים ובגוף כדי ליצור את אותה צורה!',
+  'Amazing! You matched the shape! 🌟': 'מדהים! התאמתם לצורה! 🌟',
+  'Great job matching the shape! 👏': 'עבודה נהדרת בהתאמה לצורה! 👏',
+  'You matched the shape! Try again for more stars! 💪': 'התאמתם לצורה! נסו שוב לעוד כוכבים! 💪',
+  'Keep practicing! Match the shape with your body. 🔷': 'המשיכו לתרגל! התאימו את הצורה עם הגוף. 🔷',
+
   // Share button
   'Share my character image and message on WhatsApp': 'שיתוף תמונת הדמות וההודעה שלי ב־WhatsApp',
   'Play too': 'גם אתם מוזמנים לשחק',

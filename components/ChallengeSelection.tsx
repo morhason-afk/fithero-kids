@@ -26,7 +26,8 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
   const sortedChallenges = [...challenges].sort((a, b) => a.order - b.order)
 
   const handleChallengeClick = (challenge: Challenge, index: number) => {
-    const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
+    const prevInTrail = sortedChallenges[index - 1]
+    const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge), prevInTrail?.id)
     if (!unlocked) return
     const needsSubscription = challengeRequiresSubscription(index) && !hasSubscription
     if (needsSubscription) {
@@ -53,7 +54,8 @@ export default function ChallengeSelection({ onSelectChallenge }: ChallengeSelec
           </div>
 
           {sortedChallenges.map((challenge, index) => {
-            const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge))
+            const prevInTrail = sortedChallenges[index - 1]
+            const unlocked = isChallengeUnlocked(challenge, challengeProgress, getMinStarsToUnlock(challenge), prevInTrail?.id)
             const subscriptionLocked = challengeRequiresSubscription(index) && !hasSubscription
             const progress = getProgress(challenge.id)
             const showLock = !unlocked || subscriptionLocked
